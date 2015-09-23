@@ -1,0 +1,7 @@
+{
+    "require": {
+        "filp/whoops": "1.*",
+        "monolog/monolog": "1.17.*",
+        "facebook/php-sdk-v4" : "~5.0"
+    }
+}
