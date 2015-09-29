@@ -2,9 +2,6 @@
     "require": {
         "filp/whoops": "1.*",
         "xxtime/component": "dev-master",
-        "symfony/var-dumper" : "v2.7.5",
-        "symfony/filesystem" : "v2.7.5",
-        "symfony/finder" : "v2.7.5",
         "monolog/monolog": "1.17.*",
         "facebook/php-sdk-v4" : "~5.0"
     }
