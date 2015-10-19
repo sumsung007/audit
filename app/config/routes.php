@@ -22,6 +22,23 @@ $router->add('/:controller', array(
     'controller' => 1
 ));
 
+$router->add('/api/:controller/:action/:params', array(
+    'namespace' => 'MyApp\Controllers\Api',
+    'controller' => 1,
+    'action' => 2,
+    'params' => 3,
+));
+
+$router->add('/api/:controller', array(
+    'namespace' => 'MyApp\Controllers\Api',
+    'controller' => 1
+));
+
+$router->add('/api', array(
+    'namespace' => 'MyApp\Controllers\Api',
+    'controller' => 'Index'
+));
+
 $router->add('/admin/:controller/:action/:params', array(
     'namespace' => 'MyApp\Controllers\Admin',
     'controller' => 1,
