@@ -4,4 +4,4 @@ composer.lock
 vendor/
 app/cache/
 app/logs/
-app/config/config.ini
+app/config/
