@@ -6,10 +6,10 @@ $loader = new \Phalcon\Loader();
 /**
  * Read the configuration
  */
-$config = __DIR__ . "/config.ini";
-$config_dev = __DIR__ . "/config.dev.ini";
-if (file_exists($config_dev)) {
-    $config = $config_dev;
+$config = __DIR__ . "/config.example.ini";
+$config_pro = __DIR__ . "/config.ini";
+if (file_exists($config_pro)) {
+    $config = $config_pro;
 }
 $config = new Phalcon\Config\Adapter\Ini($config);
 
