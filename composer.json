@@ -1,8 +1,6 @@
 {
-    "require": {
-        "filp/whoops": "1.*",
-        "xxtime/component": "dev-master",
-        "monolog/monolog": "1.17.*",
-        "facebook/php-sdk-v4" : "~5.0"
-    }
+  "require": {
+    "filp/whoops": "1.*",
+    "xxtime/component": "dev-master"
+  }
 }

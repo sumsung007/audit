@@ -10,52 +10,123 @@
 
 $router = new Phalcon\Mvc\Router(false);
 
-$router->add('/:controller/:action/:params', array(
-    'namespace' => 'MyApp\Controllers',
-    'controller' => 1,
-    'action' => 2,
-    'params' => 3,
-));
 
-$router->add('/:controller', array(
-    'namespace' => 'MyApp\Controllers',
-    'controller' => 1
-));
+// 通用路由
+$router->add(
+    '/:controller/:action/:params',
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'controller' => 1,
+        'action' => 2,
+        'params' => 3
+    )
+);
 
-$router->add('/api/:controller/:action/:params', array(
-    'namespace' => 'MyApp\Controllers\Api',
-    'controller' => 1,
-    'action' => 2,
-    'params' => 3,
-));
+$router->add(
+    '/:controller',
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'controller' => 1
+    )
+);
 
-$router->add('/api/:controller', array(
-    'namespace' => 'MyApp\Controllers\Api',
-    'controller' => 1
-));
 
-$router->add('/api', array(
-    'namespace' => 'MyApp\Controllers\Api',
-    'controller' => 'Index'
-));
+// 多应用路由    Matches "/123/news/show/1"
+$router->add(
+    "/([0-9]+)/:controller/:action/:params",
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'app' => 1,
+        'controller' => 2,
+        'action' => 3,
+        'params' => 4
+    )
+);
+$router->add(
+    "/([0-9]+)/:controller",
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'app' => 1,
+        'controller' => 2
+    )
+);
 
-$router->add('/admin/:controller/:action/:params', array(
-    'namespace' => 'MyApp\Controllers\Admin',
-    'controller' => 1,
-    'action' => 2,
-    'params' => 3,
-));
 
-$router->add('/admin/:controller', array(
-    'namespace' => 'MyApp\Controllers\Admin',
-    'controller' => 1
-));
+// 接口路由
+$router->add(
+    '/api/:controller/:action/:params',
+    array(
+        'namespace' => 'MyApp\Controllers\Api',
+        'controller' => 1,
+        'action' => 2,
+        'params' => 3
+    )
+);
 
-$router->add('/admin', array(
-    'namespace' => 'MyApp\Controllers\Admin',
-    'controller' => 'Index'
-));
+$router->add(
+    '/api/:controller',
+    array(
+        'namespace' => 'MyApp\Controllers\Api',
+        'controller' => 1
+    )
+);
 
+$router->add(
+    '/api',
+    array(
+        'namespace' => 'MyApp\Controllers\Api',
+        'controller' => 'Index'
+    )
+);
+
+
+// 后台路由
+$router->add(
+    '/admin/:controller/:action/:params',
+    array(
+        'namespace' => 'MyApp\Controllers\Admin',
+        'controller' => 1,
+        'action' => 2,
+        'params' => 3
+    )
+);
+
+$router->add(
+    '/admin/:controller',
+    array(
+        'namespace' => 'MyApp\Controllers\Admin',
+        'controller' => 1
+    )
+);
+
+$router->add(
+    '/admin',
+    array(
+        'namespace' => 'MyApp\Controllers\Admin',
+        'controller' => 'Index'
+    )
+);
+
+
+// 公用方法路由
+$router->add(
+    "/login",
+    array(
+        'controller' => 'public',
+        'action' => 'login'
+    )
+);
+
+$router->add(
+    "/logout",
+    array(
+        'controller' => 'public',
+        'action' => 'logout'
+    )
+);
+
+
+// 忽略尾部斜杠
 $router->removeExtraSlashes(true);
 
 return $router;
