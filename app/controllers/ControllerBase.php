@@ -18,11 +18,11 @@ class ControllerBase extends Controller
 
 
         // 设置时区
-        ini_set("date.timezone", $this->_config->env->timezone);
+        ini_set("date.timezone", $this->_config->setting->timezone);
 
 
         // 日志记录
-        if ($config->development->record_request) {
+        if ($config->setting->recordRequest) {
             write_log(urldecode(http_build_query($_REQUEST)), date("Ymd") . '.log');
         }
     }

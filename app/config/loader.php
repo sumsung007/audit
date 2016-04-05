@@ -19,6 +19,7 @@ $config = new Phalcon\Config\Adapter\Ini($config);
 $loader->registerNamespaces(array(
 	'MyApp\Controllers' => APP_PATH . $config->application->controllersDir,
 	'MyApp\Models'      => APP_PATH . $config->application->modelsDir,
+	'MyApp\Services'    => APP_PATH . $config->application->servicesDir,
 	'MyApp\Plugins'     => APP_PATH . $config->application->pluginsDir,
 	'MyApp\Library'     => APP_PATH . $config->application->libraryDir,
 ))->register();
