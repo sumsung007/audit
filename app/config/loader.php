@@ -30,13 +30,13 @@ include_once APP_PATH . $config->application->pluginsDir . 'Common.php';
 $vendor = APP_PATH . '/vendor/autoload.php';
 if (file_exists($vendor)) {
     include_once $vendor;
-    if ($config->development->app_debug == true) {
+    if ($config->setting->appDebug == true) {
         include APP_PATH . $config->application->pluginsDir . 'Exception.php';
     }
 }
 
 // set error_reporting
-switch ($config->development->app_debug) {
+switch ($config->setting->appDebug) {
     case true:
         error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING); #error_reporting(E_ALL);
         break;

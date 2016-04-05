@@ -59,31 +59,31 @@ $di->set('view', function() use ($config) {
  */
 $di->set('data', function() use ($config) {
 	return new DbAdapter(array(
-		'host'      =>  $config->data->host,
-		'username'  =>  $config->data->username,
-		'password'  =>  $config->data->password,
-		'dbname'    =>  $config->data->dbname,
-		'charset'   =>  $config->data->charset
+		'host'      =>  $config->db_data->host,
+		'username'  =>  $config->db_data->username,
+		'password'  =>  $config->db_data->password,
+		'dbname'    =>  $config->db_data->dbname,
+		'charset'   =>  $config->db_data->charset
 	));
 });
 
 $di->set('setting', function() use ($config) {
     return new DbAdapter(array(
-        'host'      =>  $config->setting->host,
-        'username'  =>  $config->setting->username,
-        'password'  =>  $config->setting->password,
-        'dbname'    =>  $config->setting->dbname,
-        'charset'   =>  $config->setting->charset
+        'host'      =>  $config->db_setting->host,
+        'username'  =>  $config->db_setting->username,
+        'password'  =>  $config->db_setting->password,
+        'dbname'    =>  $config->db_setting->dbname,
+        'charset'   =>  $config->db_setting->charset
     ));
 });
 
 $di->set('log', function() use ($config) {
     return new DbAdapter(array(
-        'host'      =>  $config->log->host,
-        'username'  =>  $config->log->username,
-        'password'  =>  $config->log->password,
-        'dbname'    =>  $config->log->dbname,
-        'charset'   =>  $config->log->charset
+        'host'      =>  $config->db_log->host,
+        'username'  =>  $config->db_log->username,
+        'password'  =>  $config->db_log->password,
+        'dbname'    =>  $config->db_log->dbname,
+        'charset'   =>  $config->db_log->charset
     ));
 });
 
