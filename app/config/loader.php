@@ -21,7 +21,7 @@ $loader->registerNamespaces(array(
 	'MyApp\Models'      => APP_PATH . $config->application->modelsDir,
 	'MyApp\Services'    => APP_PATH . $config->application->servicesDir,
 	'MyApp\Plugins'     => APP_PATH . $config->application->pluginsDir,
-	'MyApp\Library'     => APP_PATH . $config->application->libraryDir,
+	'MyApp\Libraries'   => APP_PATH . $config->application->librariesDir,
 ))->register();
 
 // load function
