@@ -7,7 +7,30 @@ use Phalcon\DI\FactoryDefault,
 	Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter,
 	Phalcon\Mvc\View\Engine\Volt as VoltEngine,
 	Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter,
-	Phalcon\Session\Adapter\Files as SessionAdapter;
+	Phalcon\Session\Adapter\Files as SessionAdapter,
+	Phalcon\Events\Manager as EventsManager,
+    Phalcon\Logger,
+    Phalcon\Logger\Adapter\File as FileLogger;
+
+
+/**
+ * Events Manager
+ */
+$logger = new FileLogger(APP_PATH . $config->application->logsDir . "Logs.log");
+$eventsManager = new EventsManager();
+$eventsManager->attach('db', function ($event, $connection) use ($config, $logger) {
+    if ($event->getType() == 'beforeQuery') {
+        if ($config->setting->recordSQL) {
+            $logger->log($connection->getSQLStatement(), Logger::INFO);
+        }
+        if (preg_match('/drop|alter/i', $connection->getSQLStatement())) {
+            return false;
+        }
+    }
+    if ($event->getType() == 'afterQuery') {
+    }
+});
+
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
@@ -55,39 +78,6 @@ $di->set('view', function() use ($config) {
 }, true);
 
 /**
- * Database connection is created based in the parameters defined in the configuration file
- */
-$di->set('data', function() use ($config) {
-	return new DbAdapter(array(
-		'host'      =>  $config->db_data->host,
-		'username'  =>  $config->db_data->username,
-		'password'  =>  $config->db_data->password,
-		'dbname'    =>  $config->db_data->dbname,
-		'charset'   =>  $config->db_data->charset
-	));
-});
-
-$di->set('setting', function() use ($config) {
-    return new DbAdapter(array(
-        'host'      =>  $config->db_setting->host,
-        'username'  =>  $config->db_setting->username,
-        'password'  =>  $config->db_setting->password,
-        'dbname'    =>  $config->db_setting->dbname,
-        'charset'   =>  $config->db_setting->charset
-    ));
-});
-
-$di->set('log', function() use ($config) {
-    return new DbAdapter(array(
-        'host'      =>  $config->db_log->host,
-        'username'  =>  $config->db_log->username,
-        'password'  =>  $config->db_log->password,
-        'dbname'    =>  $config->db_log->dbname,
-        'charset'   =>  $config->db_log->charset
-    ));
-});
-
-/**
  * If the configuration specify the use of metadata adapter use it or use memory otherwise
  */
 $di->set('modelsMetadata', function() use ($config) {
@@ -107,4 +97,43 @@ $di->set('dispatcher', function(){
 	$dispatcher = new Dispatcher();
 	$dispatcher->setDefaultNamespace('MyApp\Controllers');
 	return $dispatcher;
+});
+
+/**
+ * Database connection is created based in the parameters defined in the configuration file
+ */
+$di->set('data', function() use ($config, $eventsManager) {
+    $connection = new DbAdapter(array(
+			'host'      =>  $config->db_data->host,
+			'username'  =>  $config->db_data->username,
+			'password'  =>  $config->db_data->password,
+			'dbname'    =>  $config->db_data->dbname,
+			'charset'   =>  $config->db_data->charset
+	));
+    $connection->setEventsManager($eventsManager);
+    return $connection;
+});
+
+$di->set('setting', function() use ($config, $eventsManager) {
+    $connection = new DbAdapter(array(
+			'host'      =>  $config->db_setting->host,
+			'username'  =>  $config->db_setting->username,
+			'password'  =>  $config->db_setting->password,
+			'dbname'    =>  $config->db_setting->dbname,
+			'charset'   =>  $config->db_setting->charset
+	));
+    $connection->setEventsManager($eventsManager);
+    return $connection;
+});
+
+$di->set('log', function() use ($config, $eventsManager) {
+    $connection= new DbAdapter(array(
+			'host'      =>  $config->db_log->host,
+			'username'  =>  $config->db_log->username,
+			'password'  =>  $config->db_log->password,
+			'dbname'    =>  $config->db_log->dbname,
+			'charset'   =>  $config->db_log->charset
+	));
+    $connection->setEventsManager($eventsManager);
+    return $connection;
 });
