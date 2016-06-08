@@ -10,7 +10,10 @@ use Phalcon\DI\FactoryDefault,
 	Phalcon\Session\Adapter\Files as SessionAdapter,
 	Phalcon\Events\Manager as EventsManager,
     Phalcon\Logger,
-    Phalcon\Logger\Adapter\File as FileLogger;
+    Phalcon\Logger\Adapter\File as FileLogger,
+	Phalcon\Cache\Frontend\Data as FrontData,
+	Phalcon\Cache\Backend\File as BackFile,
+    Phalcon\Cache\Backend\Redis as BackRedis;
 
 
 /**
@@ -82,6 +85,21 @@ $di->set('view', function() use ($config) {
  */
 $di->set('modelsMetadata', function() use ($config) {
 	return new MetaDataAdapter();
+});
+
+/**
+ * link https://docs.phalconphp.com/zh/latest/reference/cache.html
+ */
+$di->set('modelsCache', function() use ($config) {
+	$frontCache = new FrontData(array("lifetime" => 3600));
+	// Redis Cache
+	if ($config->redis) {
+		$cache = new BackRedis($frontCache, array('prefix' => $config->redis->prefix, 'host' => $config->redis->host, 'port' => $config->redis->port, 'index' => $config->redis->index));
+		return $cache;
+	}
+	// File Cache
+	$cache = new BackFile($frontCache, array('prefix' => 'cache_', 'cacheDir' => APP_PATH . $config->application->cacheDir));
+	return $cache;
 });
 
 /**
