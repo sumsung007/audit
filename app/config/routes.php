@@ -126,6 +126,30 @@ $router->add(
 );
 
 
+// 文章
+$router->add(
+    "/article/([0-9]+)(|\.(html|htm))",
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'controller' => 'article',
+        'action' => 'view',
+        'id' => 1
+    )
+);
+
+
+// 标签
+$router->add(
+    "/tag/:params",
+    array(
+        'namespace' => 'MyApp\Controllers',
+        'controller' => 'tag',
+        'action' => 'view',
+        'param' => 1
+    )
+);
+
+
 // 忽略尾部斜杠
 $router->removeExtraSlashes(true);
 
