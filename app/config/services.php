@@ -91,7 +91,7 @@ $di->set('modelsMetadata', function() use ($config) {
  * link https://docs.phalconphp.com/zh/latest/reference/cache.html
  */
 $di->set('modelsCache', function() use ($config) {
-	$frontCache = new FrontData(array("lifetime" => 3600));
+	$frontCache = new FrontData(array("lifetime" => $config->setting->cacheTime));
 	// Redis Cache
 	if ($config->redis) {
 		$cache = new BackRedis($frontCache, array('prefix' => $config->redis->prefix, 'host' => $config->redis->host, 'port' => $config->redis->port, 'index' => $config->redis->index));
