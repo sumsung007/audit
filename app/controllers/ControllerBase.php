@@ -23,7 +23,9 @@ class ControllerBase extends Controller
 
         // 日志记录
         if ($config->setting->recordRequest) {
-            write_log(urldecode(http_build_query($_REQUEST)), date("Ymd") . '.log');
+            $_url = $_REQUEST['_url'];
+            unset($_REQUEST['_url']);
+            write_log($_url . '?' . urldecode(http_build_query($_REQUEST)), date("Ymd") . '.log');
         }
     }
 
