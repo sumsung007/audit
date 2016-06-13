@@ -133,4 +133,11 @@ class DemoController extends Controller
         dump($response);
     }
 
+
+    public function templateAction()
+    {
+        $this->view->data = time();
+        $this->view->pick("demo/template");
+    }
+
 }
