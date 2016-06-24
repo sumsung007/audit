@@ -25,7 +25,8 @@ class ControllerBase extends Controller
         if ($config->setting->recordRequest) {
             $_url = $_REQUEST['_url'];
             unset($_REQUEST['_url']);
-            write_log($_url . '?' . urldecode(http_build_query($_REQUEST)), date("Ymd") . '.log');
+            $log = empty($_REQUEST) ? $_url : ($_url . '?' . urldecode(http_build_query($_REQUEST)));
+            write_log($log, date("Ymd") . '.log');
         }
     }
 
