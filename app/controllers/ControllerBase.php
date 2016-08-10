@@ -20,8 +20,12 @@ class ControllerBase extends Controller
 
         // 日志记录
         if ($this->config->setting->recordRequest) {
-            $_url = $_REQUEST['_url'];
-            unset($_REQUEST['_url']);
+            if (isset($_REQUEST['_url'])) {
+                $_url = $_REQUEST['_url'];
+                unset($_REQUEST['_url']);
+            } else {
+                $_url = '/';
+            }
             $log = empty($_REQUEST) ? $_url : ($_url . '?' . urldecode(http_build_query($_REQUEST)));
             write_log($log, date("Ymd") . '.log');
         }
