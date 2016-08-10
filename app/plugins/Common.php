@@ -24,7 +24,7 @@ function debug()
 function write_log($log = '', $file = 'debug.txt')
 {
     global $config;
-    $log_file = APP_PATH . $config->application->logsDir . $file;
+    $log_file = BASE_DIR . $config->application->logsDir . $file;
     $handle = fopen($log_file, "a+b");
     $text = date('Y-m-d H:i:s') . ' ' . $log . "\r\n";
     fwrite($handle, $text);

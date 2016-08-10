@@ -7,8 +7,11 @@
  * Link:    http://www.xxtime.com
  * link: http://docs.phalconphp.com/zh/latest/reference/routing.html
  */
+use Phalcon\Mvc\Router;
 
-$router = new Phalcon\Mvc\Router(false);
+
+$router = new Router(false);
+$router->removeExtraSlashes(true);
 
 
 // 通用路由
@@ -149,8 +152,5 @@ $router->add(
     )
 );
 
-
-// 忽略尾部斜杠
-$router->removeExtraSlashes(true);
 
 return $router;

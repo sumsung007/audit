@@ -1,22 +1,18 @@
 <?php
 
-define('APP_PATH', realpath(__DIR__ . '/../'));
+/**
+ * Link: https://github.com/phalcon/mvc
+ */
+
+define('BASE_DIR', dirname(__DIR__));
+define('APP_DIR', BASE_DIR . '/app');
 
 use Phalcon\Mvc\Application;
 
-/**
- * Read auto-loader
- */
-include __DIR__ . "/../app/config/loader.php";
+include APP_DIR . "/config/loader.php";
 
-/**
- * Read services
- */
-include __DIR__ . "/../app/config/services.php";
+include APP_DIR . "/config/services.php";
 
-/**
- * Handle the request
- */
 $application = new Application($di);
 
 echo $application->handle()->getContent();

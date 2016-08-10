@@ -1,6 +1,6 @@
 {
   "require": {
-    "filp/whoops": "1.*",
+    "filp/whoops": "dev-master",
     "xxtime/component": "dev-master"
   }
 }

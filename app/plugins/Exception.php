@@ -13,7 +13,7 @@ use Whoops\Handler\JsonResponseHandler;
 
 $whoops = new Whoops\Run;
 $handler = new PrettyPageHandler;
-$handler->setPageTitle("Error");
+$handler->setPageTitle("ERROR");
 //$handler->addDataTable("Extra Info", array());
 $whoops->pushHandler($handler);
 //$whoops->pushHandler(new JsonResponseHandler);
