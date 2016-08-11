@@ -18,14 +18,12 @@ use Phalcon\DI\FactoryDefault,
     Phalcon\Cache\Backend\Redis as BackRedis;
 
 
-/**
- * Events Manager
- */
-$logger = new FileLogger(BASE_DIR . $config->application->logsDir . "Logs.log");
+// Events Manager
 $eventsManager = new EventsManager();
-$eventsManager->attach('db', function ($event, $connection) use ($config, $logger) {
+$eventsManager->attach('db', function ($event, $connection) use ($config) {
     if ($event->getType() == 'beforeQuery') {
         if ($config->setting->recordSQL) {
+            $logger = new FileLogger(BASE_DIR . $config->application->logsDir . "logsSQL.log");
             $logger->log($connection->getSQLStatement(), Logger::INFO);
         }
         if (preg_match('/drop|alter/i', $connection->getSQLStatement())) {
@@ -114,9 +112,7 @@ $di->set('dispatcher', function () {
 }, true);
 
 
-/**
- * Database connection is created based in the parameters defined in the configuration file
- */
+// Database connection
 $di->set('data', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
 			'host'      =>  $config->db_data->host,
