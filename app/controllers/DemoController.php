@@ -134,6 +134,19 @@ class DemoController extends Controller
     }
 
 
+    //https://docs.phalconphp.com/en/latest/reference/cookies.html
+    public function cookiesAction()
+    {
+        $this->cookies->set('foo', 'some cookies', time() + 86400);
+        $this->cookies->send();
+
+        if ($this->cookies->has('foo')) {
+            $value = $this->cookies->get('foo')->getValue();
+        }
+        dd($value);
+    }
+
+
     // link https://docs.phalconphp.com/zh/latest/reference/volt.html
     public function templateAction()
     {

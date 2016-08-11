@@ -8,8 +8,10 @@ use Phalcon\DI\FactoryDefault,
     Phalcon\Mvc\View\Engine\Volt as VoltEngine,
     Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter,
     Phalcon\Session\Adapter\Files as SessionAdapter,
+    Phalcon\Http\Response\Cookies,
     Phalcon\Events\Manager as EventsManager,
     Phalcon\Logger,
+    Phalcon\Crypt,
     Phalcon\Logger\Adapter\File as FileLogger,
     Phalcon\Cache\Frontend\Data as FrontData,
     Phalcon\Cache\Backend\File as BackFile,
@@ -35,9 +37,7 @@ $eventsManager->attach('db', function ($event, $connection) use ($config, $logge
 });
 
 
-/**
- * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
- */
+//$di = new Phalcon\Di();
 $di = new FactoryDefault();
 
 $di->set('config', function () use ($config) {
@@ -46,6 +46,12 @@ $di->set('config', function () use ($config) {
 
 $di->set('router', function () {
     return require __DIR__ . '/routes.php';
+}, true);
+
+$di->set('crypt', function () use ($config) {
+    $crypt = new Crypt();
+    $crypt->setKey($config->setting->cryptKey);
+    return $crypt;
 }, true);
 
 $di->set('url', function () use ($config) {
