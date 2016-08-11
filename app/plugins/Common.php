@@ -21,7 +21,7 @@ function debug()
     exit;
 }
 
-function write_log($log = '', $file = 'debug.txt')
+function writeLog($log = '', $file = 'logs.txt')
 {
     global $config;
     $log_file = BASE_DIR . $config->application->logsDir . $file;

@@ -3,6 +3,8 @@
 namespace MyApp\Controllers;
 
 use Phalcon\Mvc\Controller;
+use Phalcon\Logger\Adapter\File as FileLogger;
+use Phalcon\Logger;
 
 class ControllerBase extends Controller
 {
@@ -27,7 +29,7 @@ class ControllerBase extends Controller
                 $_url = '/';
             }
             $log = empty($_REQUEST) ? $_url : ($_url . '?' . urldecode(http_build_query($_REQUEST)));
-            write_log($log, date("Ymd") . '.log');
+            (new FileLogger(BASE_DIR . $this->config->application->logsDir . date("Ymd") . '.log'))->log($log, Logger::INFO);
         }
     }
 
