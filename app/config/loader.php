@@ -9,10 +9,10 @@ $config = new Ini(APP_DIR . "/config/config.ini");
 $loader = new Loader();
 
 
-/**
- * We're a registering a set of directories taken from the configuration file
- */
+// We're a registering a set of directories taken from the configuration file
 $loader->registerNamespaces(array(
+    'MyApp\Controllers\Api'     => BASE_DIR . $config->application->controllersDir . 'api/',
+    'MyApp\Controllers\Admin'   => BASE_DIR . $config->application->controllersDir . 'admin/',
 	'MyApp\Controllers' => BASE_DIR . $config->application->controllersDir,
 	'MyApp\Models'      => BASE_DIR . $config->application->modelsDir,
 	'MyApp\Services'    => BASE_DIR . $config->application->servicesDir,
