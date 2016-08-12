@@ -54,7 +54,7 @@ $di->set('crypt', function () use ($config) {
 
 $di->set('url', function () use ($config) {
     $url = new UrlResolver();
-    $url->setBaseUri(BASE_DIR . $config->application->baseUri);
+    $url->setBaseUri($config->application->baseUri);
     return $url;
 }, true);
 
