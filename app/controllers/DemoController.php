@@ -1,17 +1,33 @@
 <?php
 
+
 namespace MyApp\Controllers;
 
 use Phalcon\Mvc\Controller;
+use Phalcon\Mvc\Dispatcher;
 use MyApp\Models\Demo;
 use MyApp\Services\Services;
 use Phalcon\Filter;
+
 
 class DemoController extends Controller
 {
 
     private $demoModel;
     private $filterModel;
+
+
+    public function beforeExecuteRoute(Dispatcher $dispatcher)
+    {
+        // 在每一个找到的动作前执行
+    }
+
+
+    public function afterExecuteRoute(Dispatcher $dispatcher)
+    {
+        // 在每一个找到的动作后执行
+    }
+
 
     public function initialize()
     {

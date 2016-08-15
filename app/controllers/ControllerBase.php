@@ -1,10 +1,13 @@
 <?php
 
+
 namespace MyApp\Controllers;
 
 use Phalcon\Mvc\Controller;
+use Phalcon\Mvc\Dispatcher;
 use Phalcon\Logger\Adapter\File as FileLogger;
 use Phalcon\Logger;
+
 
 class ControllerBase extends Controller
 {
@@ -29,7 +32,8 @@ class ControllerBase extends Controller
                 $_url = '/';
             }
             $log = empty($_REQUEST) ? $_url : ($_url . '?' . urldecode(http_build_query($_REQUEST)));
-            (new FileLogger(BASE_DIR . $this->config->application->logsDir . date("Ymd") . '.log'))->log($log, Logger::INFO);
+            $logger = new FileLogger(BASE_DIR . $this->config->application->logsDir . date("Ymd") . '.log');
+            $logger->log($log, Logger::INFO);
         }
     }
 

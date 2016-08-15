@@ -11,14 +11,14 @@ class User extends Model
 
     public function initialize()
     {
-        $this->setConnectionService('data');
+        $this->setConnectionService('dbData');
         $this->setSource("users");
     }
 
     public function get_user()
     {
         $sql = "SELECT * FROM users";
-        $connection = DI::getDefault()->get('data');
+        $connection = DI::getDefault()->get('dbData');
         $result = $connection->query($sql);
         $result->setFetchMode(Db::FETCH_ASSOC);
         $result = $result->fetch();

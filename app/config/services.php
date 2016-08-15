@@ -113,7 +113,7 @@ $di->set('dispatcher', function () {
 
 
 // Database connection
-$di->set('data', function () use ($config, $eventsManager) {
+$di->set('dbData', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
 			'host'      =>  $config->db_data->host,
 			'username'  =>  $config->db_data->username,
@@ -125,7 +125,7 @@ $di->set('data', function () use ($config, $eventsManager) {
     return $connection;
 }, true);
 
-$di->set('setting', function () use ($config, $eventsManager) {
+$di->set('dbSetting', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
 			'host'      =>  $config->db_setting->host,
 			'username'  =>  $config->db_setting->username,
@@ -137,7 +137,7 @@ $di->set('setting', function () use ($config, $eventsManager) {
     return $connection;
 }, true);
 
-$di->set('log', function () use ($config, $eventsManager) {
+$di->set('dbLog', function () use ($config, $eventsManager) {
     $connection= new DbAdapter(array(
 			'host'      =>  $config->db_log->host,
 			'username'  =>  $config->db_log->username,

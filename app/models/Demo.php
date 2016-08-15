@@ -13,9 +13,9 @@ class Demo extends Model
 
     public function initialize()
     {
-        $this->setConnectionService('data');
+        $this->setConnectionService('dbData');
         $this->setSource("users");
-        $this->dbConnectionData = DI::getDefault()->get('data');
+        $this->dbConnectionData = DI::getDefault()->get('dbData');
     }
 
 
