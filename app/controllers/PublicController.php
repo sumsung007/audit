@@ -22,6 +22,7 @@ class PublicController extends Controller
 
     public function logoutAction()
     {
+        $this->session->destroy();
         dd('Logout Page');
     }
 

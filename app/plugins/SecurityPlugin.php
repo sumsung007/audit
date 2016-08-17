@@ -28,6 +28,7 @@ class SecurityPlugin extends Plugin
         global $config;
         if (!$config->setting->appDebug) {
             $dispatcher->forward([
+                'namespace' => 'MyApp\Controllers',
                 'controller' => 'errors',
                 'action' => 'show404'
             ]);
@@ -124,13 +125,20 @@ class SecurityPlugin extends Plugin
         }
 
 
-        $controller = $dispatcher->getControllerName();
+        $namespaceName = $dispatcher->getNamespaceName();
+        if ($namespaceName != 'MyApp\Controllers') {
+            $prefix = strtolower(substr($namespaceName, strrpos($namespaceName, '\\') + 1));
+            $controller = $prefix . '/' . $dispatcher->getControllerName();
+        } else {
+            $controller = $dispatcher->getControllerName();
+        }
         $action = $dispatcher->getActionName();
 
 
         // 资源未定义(无权限)
         if (!$acl->isResource($controller)) {
             $dispatcher->forward([
+                'namespace' => 'MyApp\Controllers',
                 'controller' => 'errors',
                 'action' => 'show401'
             ]);
@@ -140,6 +148,7 @@ class SecurityPlugin extends Plugin
 
         if (!$acl->isAllowed($role, $controller, $action)) {
             $dispatcher->forward(array(
+                'namespace' => 'MyApp\Controllers',
                 'controller' => 'errors',
                 'action' => 'show401'
             ));

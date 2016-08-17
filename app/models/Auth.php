@@ -78,7 +78,14 @@ class Auth extends Model
         $result = [];
         foreach ($data as $value) {
             $resource = explode('/', trim($value['resource'], '/'));
-            $result[$resource['0']][] = $resource['1'];
+            if (in_array($resource['0'], array('api', 'admin'))) {
+                $controller = "{$resource['0']}/{$resource['1']}";
+                $action = isset($resource['2']) ? $resource['2'] : 'index';
+            } else {
+                $controller = $resource['0'];
+                $action = isset($resource['1']) ? $resource['1'] : 'index';
+            }
+            $result[$controller][] = $action;
         }
         return $result;
     }
