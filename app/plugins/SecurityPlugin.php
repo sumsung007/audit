@@ -68,7 +68,6 @@ class SecurityPlugin extends Plugin
             'public' => array('logout'),
             'about' => array('index'),
             'contact' => array('index'),
-            'demo' => array('index'),
             'errors' => array('show401', 'show404', 'show500')
         );
         $authModel = new Auth();
