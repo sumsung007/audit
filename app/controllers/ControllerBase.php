@@ -13,6 +13,7 @@ class ControllerBase extends Controller
 {
 
     public $_app;
+    public $_userID;
 
 
     public function beforeExecuteRoute(Dispatcher $dispatcher)
@@ -41,6 +42,15 @@ class ControllerBase extends Controller
             $logger = new FileLogger(BASE_DIR . $this->config->application->logsDir . date("Ymd") . '.log');
             $logger->log($log, Logger::INFO);
         }
+
+
+        // 检查登录
+        $this->_userID = $this->session->get('userID');
+        if (!$this->_userID) {
+            header('Location:/login');
+            exit;
+        }
+
     }
 
 

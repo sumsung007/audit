@@ -17,45 +17,9 @@ class SecurityPlugin extends Plugin
 {
 
 
-    public function beforeDispatch(Event $event, Dispatcher $dispatcher)
-    {
-    }
-
-
     public function beforeExecuteRoute(Event $event, Dispatcher $dispatcher)
     {
-        $acl = $this->getAcl();
-        $userID = $this->session->get('userID');
-        if (!isset($userID)) {
-            $role = 'Guests';
-        } else {
-            $role = 'Users';
-        }
-
-
-        $controller = $dispatcher->getControllerName();
-        $action = $dispatcher->getActionName();
-
-
-        // 资源未定义(无权限)
-        if (!$acl->isResource($controller)) {
-            $dispatcher->forward([
-                'controller' => 'errors',
-                'action' => 'show401'
-            ]);
-            return false;
-        }
-
-
-        if (!$acl->isAllowed($role, $controller, $action)) {
-            $dispatcher->forward(array(
-                'controller' => 'errors',
-                'action' => 'show401'
-            ));
-            $this->flash->error("You don't have permission to save posts");
-            $this->session->destroy();
-            return false;
-        }
+        return $this->checkPermission($event, $dispatcher);
     }
 
 
@@ -65,7 +29,7 @@ class SecurityPlugin extends Plugin
         if (!$config->setting->appDebug) {
             $dispatcher->forward([
                 'controller' => 'errors',
-                'action' => 'exception'
+                'action' => 'show404'
             ]);
             return false;
         }
@@ -98,8 +62,8 @@ class SecurityPlugin extends Plugin
         // 公共资源
         $publicResources = array(
             'index' => array('index'),
-            'register' => array('index'),
-            'login' => array('index'),
+            'public' => array('login'),
+            'public' => array('logout'),
             'about' => array('index'),
             'contact' => array('index'),
             'demo' => array('index'),
@@ -146,6 +110,43 @@ class SecurityPlugin extends Plugin
 
 
         return $this->persistent->acl;
+    }
+
+
+    private function checkPermission(Event $event, Dispatcher $dispatcher)
+    {
+        $acl = $this->getAcl();
+        $userID = $this->session->get('userID');
+        if (!isset($userID)) {
+            $role = 'Guests';
+        } else {
+            $role = 'Users';
+        }
+
+
+        $controller = $dispatcher->getControllerName();
+        $action = $dispatcher->getActionName();
+
+
+        // 资源未定义(无权限)
+        if (!$acl->isResource($controller)) {
+            $dispatcher->forward([
+                'controller' => 'errors',
+                'action' => 'show401'
+            ]);
+            return false;
+        }
+
+
+        if (!$acl->isAllowed($role, $controller, $action)) {
+            $dispatcher->forward(array(
+                'controller' => 'errors',
+                'action' => 'show401'
+            ));
+            $this->flash->error("You don't have permission to save posts");
+            $this->session->destroy();
+            return false;
+        }
     }
 
 
