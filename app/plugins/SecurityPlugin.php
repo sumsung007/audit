@@ -46,7 +46,7 @@ class SecurityPlugin extends Plugin
 
         // ACL
         $acl = new AclList();
-        //$acl->setDefaultAction(Acl::DENY);
+        $acl->setDefaultAction(Acl::DENY);
 
 
         // 用户ID
@@ -55,12 +55,13 @@ class SecurityPlugin extends Plugin
 
         // 定义角色
         $roleList = array(
+            new Role('Guests', 'Guest users'),
             new Role('Users', 'Member users'),
-            new Role('Guests', 'Guest users')
+            new Role('Admins', 'Guest users')
         );
 
 
-        // 公共资源
+        // 资源
         $publicResources = array(
             'index' => array('index'),
             'public' => array('login'),
@@ -70,26 +71,24 @@ class SecurityPlugin extends Plugin
             'demo' => array('index'),
             'errors' => array('show401', 'show404', 'show500')
         );
-
-
-        // 私有资源
         $authModel = new Auth();
         $privateResources = $authModel->getAclResource($userID);
+        $allResources = $authModel->getAclResource(10000);
 
 
         // 添加角色和资源
         foreach ($roleList as $role) {
             $acl->addRole($role);
         }
-        foreach ($privateResources as $resource => $actions) {
-            $acl->addResource(new Resource($resource), $actions);
-        }
         foreach ($publicResources as $resource => $actions) {
             $acl->addResource(new Resource($resource), $actions);
         }
+        foreach ($allResources as $resource => $actions) {
+            $acl->addResource(new Resource($resource), $actions);
+        }
 
 
-        // 公共权限授权给所有角色
+        // 公共权限 Guests
         foreach ($roleList as $role) {
             foreach ($publicResources as $resource => $actions) {
                 foreach ($actions as $action) {
@@ -99,10 +98,18 @@ class SecurityPlugin extends Plugin
         }
 
 
-        // 私有权限授权给Users角色
+        // 私有权限 Users
         foreach ($privateResources as $resource => $actions) {
             foreach ($actions as $action) {
                 $acl->allow('Users', $resource, $action);
+            }
+        }
+
+
+        // 管理员 Admins
+        foreach ($allResources as $resource => $actions) {
+            foreach ($actions as $action) {
+                $acl->allow('Admins', $resource, $action);
             }
         }
 
@@ -135,25 +142,13 @@ class SecurityPlugin extends Plugin
         $action = $dispatcher->getActionName();
 
 
-        // 资源未定义(无权限)
-        if (!$acl->isResource($controller)) {
+        // 无权限
+        if ($acl->isResource($controller) != $acl->isAllowed($role, $controller, $action)) {
             $dispatcher->forward([
                 'namespace' => 'MyApp\Controllers',
                 'controller' => 'errors',
                 'action' => 'show401'
             ]);
-            return false;
-        }
-
-
-        if (!$acl->isAllowed($role, $controller, $action)) {
-            $dispatcher->forward(array(
-                'namespace' => 'MyApp\Controllers',
-                'controller' => 'errors',
-                'action' => 'show401'
-            ));
-            $this->flash->error("You don't have permission to save posts");
-            $this->session->destroy();
             return false;
         }
     }

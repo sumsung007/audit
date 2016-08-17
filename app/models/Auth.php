@@ -47,6 +47,19 @@ class Auth extends Model
      */
     public function getResources($userID = 0, $app = '')
     {
+        // 超级管理员
+        if ($userID == 10000) {
+            $sql = "SELECT res.id, res.name, res.resource, res.type, res.parent, res.icon
+                FROM `resources` res
+                WHERE res.status=1 AND res.app=:app
+                ORDER BY res.sort DESC";
+            $bind = array('app' => $app);
+            $query = $this->dbConnection->query($sql, $bind);
+            $query->setFetchMode(Db::FETCH_ASSOC);
+            return $query->fetchAll();
+        }
+
+
         $roleID = $this->getRoleID($userID);
         if (!$roleID) {
             return [];
