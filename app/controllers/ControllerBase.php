@@ -14,6 +14,12 @@ class ControllerBase extends Controller
 
     public $_app;
 
+
+    public function beforeExecuteRoute(Dispatcher $dispatcher)
+    {
+    }
+
+
     public function initialize()
     {
         $this->_app = $this->dispatcher->getParam("app");
@@ -35,6 +41,11 @@ class ControllerBase extends Controller
             $logger = new FileLogger(BASE_DIR . $this->config->application->logsDir . date("Ymd") . '.log');
             $logger->log($log, Logger::INFO);
         }
+    }
+
+
+    public function afterExecuteRoute(Dispatcher $dispatcher)
+    {
     }
 
 }

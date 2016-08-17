@@ -10,29 +10,12 @@ use Phalcon\DI\FactoryDefault,
     Phalcon\Session\Adapter\Files as SessionAdapter,
     Phalcon\Http\Response\Cookies,
     Phalcon\Events\Manager as EventsManager,
-    Phalcon\Logger,
     Phalcon\Crypt,
     Phalcon\Logger\Adapter\File as FileLogger,
     Phalcon\Cache\Frontend\Data as FrontData,
     Phalcon\Cache\Backend\File as BackFile,
-    Phalcon\Cache\Backend\Redis as BackRedis;
-
-
-// Events Manager
-$eventsManager = new EventsManager();
-$eventsManager->attach('db', function ($event, $connection) use ($config) {
-    if ($event->getType() == 'beforeQuery') {
-        if ($config->setting->recordSQL) {
-            $logger = new FileLogger(BASE_DIR . $config->application->logsDir . "logsSQL.log");
-            $logger->log($connection->getSQLStatement(), Logger::INFO);
-        }
-        if (preg_match('/drop|alter/i', $connection->getSQLStatement())) {
-            return false;
-        }
-    }
-    if ($event->getType() == 'afterQuery') {
-    }
-});
+    Phalcon\Cache\Backend\Redis as BackRedis,
+    MyApp\Plugins\SecurityPlugin;
 
 
 //$di = new Phalcon\Di();
@@ -106,11 +89,29 @@ $di->set('session', function () {
 }, true);
 
 $di->set('dispatcher', function () {
+    $eventsManager = new EventsManager();
+    $eventsManager->attach('dispatch', new SecurityPlugin);
     $dispatcher = new Dispatcher();
     $dispatcher->setDefaultNamespace('MyApp\Controllers');
+    $dispatcher->setEventsManager($eventsManager);
     return $dispatcher;
 }, true);
 
+
+// Events Manager
+// https://docs.phalconphp.com/zh/latest/reference/dispatching.html#dispatch-loop-events
+$eventsManager = new EventsManager();
+$eventsManager->attach('db', function ($event, $connection) use ($config) {
+    if ($event->getType() == 'beforeQuery') {
+        if ($config->setting->recordSQL) {
+            $logger = new FileLogger(BASE_DIR . $config->application->logsDir . "logsSQL.log");
+            $logger->log($connection->getSQLStatement());
+        }
+        if (preg_match('/drop|alter/i', $connection->getSQLStatement())) {
+            return false;
+        }
+    }
+});
 
 // Database connection
 $di->set('dbData', function () use ($config, $eventsManager) {
