@@ -37,11 +37,15 @@ class SecurityPlugin extends Plugin
     }
 
 
-    private function getAcl()
+    private function getAcl($dispatcher)
     {
         if (isset($this->persistent->acl)) {
             return $this->persistent->acl;
         }
+
+        // APP
+        $app = $dispatcher->getParam("app");
+        $app = $app ? $app : '';
 
 
         // ACL
@@ -55,30 +59,30 @@ class SecurityPlugin extends Plugin
 
         // 定义角色
         $roleList = array(
-            new Role('Guests', 'Guest users'),
-            new Role('Users', 'Member users'),
-            new Role('Admins', 'Guest users')
+            new Role('Guests', 'Guest Users'),
+            new Role('Users', 'Member Users'),
+            new Role('Admins', 'Admin Users')
         );
 
 
         // 资源
         $publicResources = array(
             'index' => array('index'),
-            'public' => array('login'),
-            'public' => array('logout'),
             'about' => array('index'),
             'contact' => array('index'),
-            'errors' => array('show401', 'show404', 'show500')
+            'errors' => array('show401', 'show404', 'show500'),
+            'public' => array('login', 'logout')
         );
         $authModel = new Auth();
-        $privateResources = $authModel->getAclResource($userID);
-        $allResources = $authModel->getAclResource(10000);
+        $privateResources = $authModel->getAclResource($userID, $app);
+        $allResources = $authModel->getAclResource(10000, $app);
 
 
-        // 添加角色和资源
+        // 添加角色
         foreach ($roleList as $role) {
             $acl->addRole($role);
         }
+        // 添加资源
         foreach ($publicResources as $resource => $actions) {
             $acl->addResource(new Resource($resource), $actions);
         }
@@ -122,7 +126,7 @@ class SecurityPlugin extends Plugin
 
     private function checkPermission(Event $event, Dispatcher $dispatcher)
     {
-        $acl = $this->getAcl();
+        $acl = $this->getAcl($dispatcher);
         $userID = $this->session->get('userID');
         if (!isset($userID)) {
             $role = 'Guests';
