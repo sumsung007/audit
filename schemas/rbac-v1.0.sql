@@ -34,7 +34,7 @@ CREATE TABLE `logsLogin` (
   `userAgent` varchar(225) DEFAULT '',
   `result` tinyint(4) DEFAULT '0',
   `createdTime` datetime DEFAULT '0000-01-01 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日至';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日志';
 
 -- --------------------------------------------------------
 

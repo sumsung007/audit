@@ -21,6 +21,32 @@ class Auth extends Model
 
 
     /**
+     * 获取用户信息
+     * @param string $username
+     * @return mixed
+     */
+    public function getUser($username = '')
+    {
+        $sql = "SELECT * FROM `users` WHERE username=:username";
+        $bind = array('username' => $username);
+        $query = $this->dbConnection->query($sql, $bind);
+        $query->setFetchMode(Db::FETCH_ASSOC);
+        $data = $query->fetch();
+        return $data;
+    }
+
+
+    /**
+     * 插入登录日志
+     * @param array $data
+     */
+    public function logsLogin($data = [])
+    {
+        $this->dbConnection->insertAsDict("logsLogin", $data);
+    }
+
+
+    /**
      * 获取角色ID
      * @param int $userID
      * @return array
