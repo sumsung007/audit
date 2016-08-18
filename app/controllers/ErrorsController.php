@@ -13,25 +13,29 @@ class ErrorsController extends Controller
 
     public function indexAction()
     {
-        dd('Error Home Page');
+        $this->view->message = 'Errors Home Page';
+        $this->view->pick("errors/index");
     }
 
 
     public function show401Action()
     {
-        dd('Error 401, No Permission');
+        $this->view->message = 'Error 401, No Permission';
+        $this->view->pick("errors/index");
     }
 
 
     public function show404Action()
     {
-        dd('Error 404, Not Found');
+        $this->view->message = 'Error 404, Not Found';
+        $this->view->pick("errors/index");
     }
 
 
     public function exceptionAction()
     {
-        dd('Error 400, There Is A Exception');
+        $this->view->message = 'Error 400, Exception Occurs';
+        $this->view->pick("errors/index");
     }
 
 }
