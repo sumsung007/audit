@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2016-08-16 09:38:14
+-- Generation Time: 2016-08-18 11:07:29
 -- 服务器版本： 5.7.9
 -- PHP Version: 5.6.15
 
@@ -19,6 +19,22 @@ SET time_zone = "+00:00";
 --
 -- Database: `phalcon`
 --
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `logsLogin`
+--
+
+CREATE TABLE `logsLogin` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `userID` int(11) DEFAULT '0',
+  `IP` varchar(15) DEFAULT '',
+  `location` varchar(32) DEFAULT '',
+  `userAgent` varchar(225) DEFAULT '',
+  `result` tinyint(4) DEFAULT '0',
+  `createdTime` datetime DEFAULT '0000-01-01 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日至';
 
 -- --------------------------------------------------------
 
@@ -106,26 +122,31 @@ CREATE TABLE `userRole` (
 CREATE TABLE `users` (
   `id` int(11) UNSIGNED NOT NULL,
   `username` varchar(32) DEFAULT '',
-  `password` varchar(32) DEFAULT '',
+  `password` varchar(225) DEFAULT '',
   `name` varchar(64) DEFAULT '',
   `status` tinyint(3) DEFAULT '1',
   `createdTime` datetime DEFAULT '0000-01-01 00:00:00',
-  `updatedTime` datetime DEFAULT '0000-01-01 00:00:00',
-  `lastLoginIP` varchar(15) DEFAULT '',
-  `lastLoginTime` datetime DEFAULT '0000-01-01 00:00:00'
+  `updatedTime` datetime DEFAULT '0000-01-01 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限部分 - 用户';
 
 --
 -- 转存表中的数据 `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `name`, `status`, `createdTime`, `updatedTime`, `lastLoginIP`, `lastLoginTime`) VALUES
-(10000, 'joe@xxtime.com', NULL, 'Joe Chu', 1, '0000-01-01 00:00:00', '0000-01-01 00:00:00', '0.0.0.0', '0000-01-01 00:00:00'),
-(10001, 'demo@xxtime.com', '', 'Demo', 1, '0000-01-01 00:00:00', '0000-01-01 00:00:00', '', '0000-01-01 00:00:00');
+INSERT INTO `users` (`id`, `username`, `password`, `name`, `status`, `createdTime`, `updatedTime`) VALUES
+(10000, 'joe@xxtime.com', '', 'Joe Chu', 1, '0000-01-01 00:00:00', '0000-01-01 00:00:00'),
+(10001, 'demo@xxtime.com', '', 'Demo', 1, '0000-01-01 00:00:00', '0000-01-01 00:00:00');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `logsLogin`
+--
+ALTER TABLE `logsLogin`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `userID` (`userID`);
 
 --
 -- Indexes for table `resources`
@@ -167,6 +188,11 @@ ALTER TABLE `users`
 -- 在导出的表使用AUTO_INCREMENT
 --
 
+--
+-- 使用表AUTO_INCREMENT `logsLogin`
+--
+ALTER TABLE `logsLogin`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- 使用表AUTO_INCREMENT `resources`
 --

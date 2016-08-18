@@ -29,6 +29,8 @@ class DemoController extends Controller
     }
 
 
+    // http://docs.phalconphp.com/zh/latest/reference/filter.html
+    // http://docs.phalconphp.com/zh/latest/reference/request.html
     public function initialize()
     {
         // parent::initialize();

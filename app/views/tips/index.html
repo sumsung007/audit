@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Errors</title>
+    <style>
+        @font-face {
+            font-family: brandon-grotesque;
+            src: url("/assets/fonts/Brandon-Grotesque-Medium.ttf")
+        }
+
+        div {
+            font-family: brandon-grotesque;
+            font-size: 58px;
+            color: #FF8C05;
+            text-align: center;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        {%if message is defined%}
+            {{message}}
+        {%endif%}
+    </div>
+</body>
+</html>

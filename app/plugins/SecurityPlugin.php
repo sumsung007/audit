@@ -29,7 +29,7 @@ class SecurityPlugin extends Plugin
         if (!$config->setting->appDebug) {
             $dispatcher->forward([
                 'namespace' => 'MyApp\Controllers',
-                'controller' => 'errors',
+                'controller' => 'tips',
                 'action' => 'show404'
             ]);
             return false;
@@ -134,8 +134,8 @@ class SecurityPlugin extends Plugin
         }
         $action = $dispatcher->getActionName();
 
-        // 不检查Errors控制器, 防止forward后二次检查
-        if ($controller == 'errors') {
+        // 不检查Tips控制器, 防止forward后二次检查
+        if ($controller == 'tips') {
             return true;
         }
 
@@ -153,7 +153,7 @@ class SecurityPlugin extends Plugin
         if ($acl->isResource($controller) != $acl->isAllowed($role, $controller, $action)) {
             $dispatcher->forward([
                 'namespace' => 'MyApp\Controllers',
-                'controller' => 'errors',
+                'controller' => 'tips',
                 'action' => 'show401'
             ]);
             return false;
