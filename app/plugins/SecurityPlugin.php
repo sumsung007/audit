@@ -70,7 +70,6 @@ class SecurityPlugin extends Plugin
             'index' => array('index'),
             'about' => array('index'),
             'contact' => array('index'),
-            'errors' => array('show401', 'show404', 'show500'),
             'public' => array('login', 'logout')
         );
         $authModel = new Auth();
@@ -126,15 +125,6 @@ class SecurityPlugin extends Plugin
 
     private function checkPermission(Event $event, Dispatcher $dispatcher)
     {
-        $acl = $this->getAcl($dispatcher);
-        $userID = $this->session->get('userID');
-        if (!isset($userID)) {
-            $role = 'Guests';
-        } else {
-            $role = 'Users';
-        }
-
-
         $namespaceName = $dispatcher->getNamespaceName();
         if ($namespaceName != 'MyApp\Controllers') {
             $prefix = strtolower(substr($namespaceName, strrpos($namespaceName, '\\') + 1));
@@ -143,6 +133,20 @@ class SecurityPlugin extends Plugin
             $controller = $dispatcher->getControllerName();
         }
         $action = $dispatcher->getActionName();
+
+        // 不检查Errors控制器, 防止forward后二次检查
+        if ($controller == 'errors') {
+            return true;
+        }
+
+
+        $acl = $this->getAcl($dispatcher);
+        $userID = $this->session->get('userID');
+        if (!isset($userID)) {
+            $role = 'Guests';
+        } else {
+            $role = 'Users';
+        }
 
 
         // 无权限
