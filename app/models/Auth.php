@@ -42,6 +42,7 @@ class Auth extends Model
      */
     public function logsLogin($data = [])
     {
+        $data['createdTime'] = date('Y-m-d H:i:s');
         $this->dbConnection->insertAsDict("logsLogin", $data);
     }
 
