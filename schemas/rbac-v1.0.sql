@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2016-08-18 11:07:29
+-- Generation Time: 2016-08-19 04:30:52
 -- 服务器版本： 5.7.9
 -- PHP Version: 5.6.15
 
@@ -32,6 +32,7 @@ CREATE TABLE `logsLogin` (
   `IP` varchar(15) DEFAULT '',
   `location` varchar(32) DEFAULT '',
   `userAgent` varchar(225) DEFAULT '',
+  `referer` text,
   `result` tinyint(4) DEFAULT '0',
   `createdTime` datetime DEFAULT '0000-01-01 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登录日志';
@@ -104,6 +105,19 @@ INSERT INTO `roles` (`id`, `name`, `parent`, `remark`, `status`, `createdTime`, 
 -- --------------------------------------------------------
 
 --
+-- 表的结构 `tickets`
+--
+
+CREATE TABLE `tickets` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `userID` int(11) DEFAULT '0',
+  `ticket` varchar(255) DEFAULT '',
+  `createdTime` datetime DEFAULT '0000-01-01 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- 表的结构 `userRole`
 --
 
@@ -170,6 +184,13 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `tickets`
+--
+ALTER TABLE `tickets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ticket` (`ticket`);
+
+--
 -- Indexes for table `userRole`
 --
 ALTER TABLE `userRole`
@@ -208,6 +229,11 @@ ALTER TABLE `roleResource`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+--
+-- 使用表AUTO_INCREMENT `tickets`
+--
+ALTER TABLE `tickets`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- 使用表AUTO_INCREMENT `userRole`
 --

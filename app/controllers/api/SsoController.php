@@ -36,7 +36,10 @@ class SsoController extends ControllerBase
             $userAgent = $this->request->getUserAgent();
 
 
-            // TODO::验证码
+            // 安全检查 TODO::验证码
+            if (!$this->authModel->checkIP($ipAddress)) {
+                Utils::tips('notice', 'Login Failed Too Much Time');
+            }
 
 
             // 查询用户
@@ -54,6 +57,7 @@ class SsoController extends ControllerBase
                 'IP' => $ipAddress,
                 'location' => $this->utilsModel->getLocation($ipAddress),
                 'userAgent' => $userAgent,
+                'referer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
                 'result' => $verifyResult ? 1 : 0,
             );
             $this->authModel->logsLogin($log);
@@ -72,6 +76,7 @@ class SsoController extends ControllerBase
 
     public function logoutAction()
     {
+        $this->session->destroy();
     }
 
 

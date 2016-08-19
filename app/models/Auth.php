@@ -58,6 +58,26 @@ class Auth extends Model
 
 
     /**
+     * 检查登录失败次数
+     * @param string $IP
+     * @return bool
+     */
+    public function checkIP($IP = '')
+    {
+        $dateTime = date('Y-m-d H:i:s', time() - 600);
+        $sql = "SELECT COUNT(1) count FROM `logsLogin` WHERE IP=:IP AND result=0 AND createdTime>'$dateTime'";
+        $bind = array('IP' => $IP);
+        $query = $this->dbConnection->query($sql, $bind);
+        $query->setFetchMode(Db::FETCH_ASSOC);
+        $data = $query->fetch();
+        if ($data['count'] < 5) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
      * 获取角色ID
      * @param int $userID
      * @return array
