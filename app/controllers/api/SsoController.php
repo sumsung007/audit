@@ -34,19 +34,21 @@ class SsoController extends ControllerBase
             $captcha = $this->request->getPost('captcha', 'alphanum');
             $ipAddress = $this->request->getClientAddress();
             $userAgent = $this->request->getUserAgent();
+            $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
 
             // 安全检查 TODO::验证码
             if (!$this->authModel->checkIP($ipAddress)) {
-                Utils::tips('notice', 'Login Failed Too Much Time');
+                Utils::tips('warning', 'Login Failed Too Much Time');
             }
 
 
             // 查询用户
             $user = $this->authModel->getUser($username);
             if (!$user) {
-                Utils::tips('notice', 'User Is Not Exist');
+                Utils::tips('warning', 'User Is Not Exist');
             }
+
 
             // 验证密码
             $verifyResult = password_verify($password, $user['password']);
@@ -57,20 +59,43 @@ class SsoController extends ControllerBase
                 'IP' => $ipAddress,
                 'location' => $this->utilsModel->getLocation($ipAddress),
                 'userAgent' => $userAgent,
-                'referer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
+                'referer' => $referer,
                 'result' => $verifyResult ? 1 : 0,
             );
             $this->authModel->logsLogin($log);
 
             if (!$verifyResult) {
-                Utils::tips('notice', 'Password Error');
+                Utils::tips('warning', 'Password Error');
+            }
+
+            if ($user['status'] != 1) {
+                Utils::tips('warning', 'The User Is Limited');
             }
 
 
-            // TODO::设置SESSION
+            // 设置SESSION
+            $this->session->set('userID', $user['id']);
+            $this->session->set('username', $user['username']);
+            $this->session->set('name', $user['name']);
 
 
+            // 生成Ticket
+            $ticket = $this->authModel->createTicket($user['id']);
+
+
+            // 回调地址
+            $redirect = urldecode(substr($referer, strpos($referer, 'redirect=') + 9));
+            if (strpos($redirect, '?')) {
+                $redirect .= '&ticket=' . $ticket;
+            } else {
+                $redirect .= '?ticket=' . $ticket;
+            }
+            header("Location:" . $redirect);
+            exit();
         }
+
+
+        $this->view->pick('sso/index');
     }
 
 
@@ -82,6 +107,17 @@ class SsoController extends ControllerBase
 
     public function verifyAction()
     {
+        $ticket = $this->request->get('ticket', 'string');
+        $user = $this->authModel->getUserByTicket($ticket);
+        if (!$user) {
+            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+        }
+        $user = array(
+            'userID' => $user['id'],
+            'username' => $user['username'],
+            'name' => $user['name']
+        );
+        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $user));
     }
 
 

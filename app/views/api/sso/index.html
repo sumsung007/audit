@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <link href="http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: brandon-grotesque;
+            src: url("/assets/fonts/Brandon-Grotesque-Medium.ttf")
+        }
+
+        body {
+            font-family: brandon-grotesque;
+        }
+
+        div.container {
+            font-size: 18px;
+            color: #FF8C05;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-md-4"></div>
+
+        <div class="col-md-4">
+            <form method="post" action="/api/sso">
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Email address</label>
+                    <input name="username" type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input name="password" type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-info btn-block">Login</button>
+            </form>
+        </div>
+
+        <div class="col-md-4"></div>
+
+    </div>
+
+</div>
+
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+</body>
+</html>

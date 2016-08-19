@@ -11,19 +11,27 @@ class Utils extends Model
 {
 
 
-    static public function tips($type = 'info', $message = '', $redirect = '')
+    static public function tips($type = 'info', $message = '', $seconds = 0, $redirect = '')
     {
         $flash = json_encode(
             array(
                 'type' => $type,
                 'message' => $message,
-                'redirect' => $redirect
+                'seconds' => !empty($seconds) ? $seconds : 3,
+                'redirect' => $redirect ? $redirect : 'javascript:history.back(-1)'
             )
         );
-        DI::getDefault()->get('cookies')->set('flash', $flash, time() + 10);
+        DI::getDefault()->get('cookies')->set('flash', $flash, time() + 30);
         DI::getDefault()->get('cookies')->send();
         header('Location:/tips');
         exit();
+    }
+
+
+    static public function outputJSON($data = [])
+    {
+        header("Content-type:application/json; charset=utf-8");
+        exit(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
 

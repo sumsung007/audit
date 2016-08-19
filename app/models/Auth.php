@@ -5,6 +5,7 @@ namespace MyApp\Models;
 use Phalcon\Mvc\Model;
 use Phalcon\DI;
 use Phalcon\Db;
+use Phalcon\Security\Random;
 
 
 /**
@@ -47,6 +48,24 @@ class Auth extends Model
 
 
     /**
+     * 用户信息 根据Ticket返回
+     * @param string $ticket
+     * @return mixed
+     */
+    public function getUserByTicket($ticket = '')
+    {
+        $dateTime = date('Y-m-d H:i:s', time() - 60);
+        $sql = "SELECT u.* FROM `users` u, `tickets` t WHERE u.id=t.userID AND t.ticket=:ticket AND t.createdTime>'$dateTime'";
+        $bind = array('ticket' => $ticket);
+        // TODO :: 此处如使用$this->dbConnection时,外部程序使用file_get_contents(VerifyURL)调用时报错,直接访问VerifyURL没问题
+        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
+        $query->setFetchMode(Db::FETCH_ASSOC);
+        $data = $query->fetch();
+        return $data;
+    }
+
+
+    /**
      * 插入登录日志
      * @param array $data
      */
@@ -74,6 +93,25 @@ class Auth extends Model
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * 生成票据Ticket
+     * @param int $userID
+     * @return mixed
+     */
+    public function  createTicket($userID = 0)
+    {
+        $random = new Random();
+        $ticket = $random->base64Safe(64);
+        $data = [
+            'userID' => $userID,
+            'ticket' => $ticket,
+            'createdTime' => date('Y-m-d H:i:s')
+        ];
+        $this->dbConnection->insertAsDict("tickets", $data);
+        return $ticket;
     }
 
 

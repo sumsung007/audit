@@ -14,7 +14,7 @@ class TipsController extends Controller
     public function indexAction()
     {
         $flashData = json_decode(trim($this->cookies->get('flash')->getValue()), true);
-        $this->view->message = $flashData['message'];
+        $this->view->tips = $flashData;
         $this->view->pick("tips/index");
     }
 

@@ -6,23 +6,68 @@
     <style>
         @font-face {
             font-family: brandon-grotesque;
-            src: url("/assets/fonts/Brandon-Grotesque-Medium.ttf")
+            src: url("/assets/fonts/Brandon-Grotesque-Light.ttf")
         }
 
         div {
             font-family: brandon-grotesque;
-            font-size: 58px;
+            font-size: 14px;
             color: #FF8C05;
             text-align: center;
             margin-top: 100px;
         }
+
+        div h3 {
+            font-size: 36px;
+        }
     </style>
 </head>
 <body>
-    <div>
-        {%if message is defined%}
-            {{message}}
-        {%endif%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4">
+                {%if message is defined%}
+                {{message}}
+                {%endif%}
+
+                <div class="error-container col-lg-10">
+                    <h3>
+                        {%if tips['type']=='error' %}
+                        <i class="fa fa-times icon  text-danger" style="font-size: 80px;"></i>
+                        {% else %}
+                        <i class="fa fa-check icon text-success" style="font-size: 80px;"></i>
+                        {% endif %}
+
+                        {% if tips['message'] %}
+                        {{tips['message']}}
+                        {% else %}
+                        Operation Is completed
+                        {% endif %}
+                    </h3>
+                    <div class="error-details">
+                        The Page Will Redirect After <b id="wait">{%if tips['seconds'] %}{{tips['seconds']}} {% else %} 3 {% endif %}</b> Seconds,
+                        Please Click <a id="href" href='{{tips['redirect']}}'>Here</a> If Not.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4"></div>
+        </div>
     </div>
 </body>
 </html>
+
+<script type="text/javascript">
+    (function(){
+        var wait = document.getElementById('wait'),href = document.getElementById('href').href;
+        var interval = setInterval(function(){
+            var time = --wait.innerHTML;
+            if(time <= 0) {
+                location.href = href;
+                clearInterval(interval);
+            };
+        }, 1000);
+    })();
+</script>
