@@ -42,26 +42,19 @@ $di->set('url', function () use ($config) {
 }, true);
 
 $di->set('view', function () use ($config) {
-
     $view = new View();
-
     $view->setViewsDir(BASE_DIR . $config->application->viewsDir);
-
     $view->registerEngines(array(
         '.html' => function ($view, $di) use ($config) {
-
             $volt = new VoltEngine($view, $di);
-
             $volt->setOptions(array(
                 'compiledPath' => BASE_DIR . $config->application->cacheDir,
                 'compiledSeparator' => '_'
             ));
-
             return $volt;
         },
-        '.phtml' => 'Phalcon\Mvc\View\Engine\Php' // Generate Template files uses PHP itself as the template engine
+        '.phtml' => 'Phalcon\Mvc\View\Engine\Php'
     ));
-
     return $view;
 }, true);
 

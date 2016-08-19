@@ -6,6 +6,17 @@ use Phalcon\Mvc\Model;
 use Phalcon\DI;
 use Phalcon\Db;
 
+
+/**
+ * AuthController
+ *
+ * 本类仅用作管理后台调用,包含两部分
+ * 1. 控制后台的RBAC权限控制
+ * 2. 控制后台的SSO单点登录
+ *
+ * 勿将本类应用于用户前端业务
+ * 前端用户数据交互可使用Users模型
+ */
 class Auth extends Model
 {
 
@@ -15,7 +26,6 @@ class Auth extends Model
     public function initialize()
     {
         $this->setConnectionService('dbData');
-        $this->setSource("users");
         $this->dbConnection = DI::getDefault()->get('dbData');
     }
 

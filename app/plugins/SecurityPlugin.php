@@ -17,7 +17,7 @@ class SecurityPlugin extends Plugin
 {
 
 
-    public function beforeExecuteRoute(Event $event, Dispatcher $dispatcher)
+    public function beforeDispatch(Event $event, Dispatcher $dispatcher)
     {
         return $this->checkPermission($event, $dispatcher);
     }

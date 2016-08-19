@@ -3,6 +3,7 @@
 
 namespace MyApp\Controllers;
 
+use MyApp\Models\Utils;
 use Phalcon\Mvc\Controller;
 
 
@@ -16,14 +17,14 @@ class PublicController extends Controller
 
     public function loginAction()
     {
-        dd('Login In Page');
+        Utils::tips('info', 'Login In Page');
     }
 
 
     public function logoutAction()
     {
         $this->session->destroy();
-        dd('Logout Page');
+        Utils::tips('info', 'Logout Page');
     }
 
 
