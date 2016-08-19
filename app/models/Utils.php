@@ -35,6 +35,41 @@ class Utils extends Model
     }
 
 
+    // 把数组转换为树状结构
+    public function list2tree($data = array())
+    {
+        $result = array();
+        foreach ($data as $value) {
+            $parent[] = $value['parent'];
+            $result[$value['id']] = $value;
+        }
+        unset($data);
+        $parent = array_filter(array_unique($parent));
+        $left_item_id = array();
+        $left = array();
+        foreach ($result as $id => $value) {
+            if ($value['parent'] == 0) {
+                continue;
+            }
+            if (!in_array($id, $parent)) {
+                // 移动节点,只允许存在父级的节点移动
+                if (isset($result[$value['parent']]['id'])) {
+                    $result[$value['parent']]['sub'][$id] = $value;
+                }
+                unset($result[$id]);
+            } else {
+                $left_item_id[] = $id;
+                $left[] = $value;
+            }
+        }
+        $intersect = array_intersect($parent, $left_item_id);
+        if ($intersect) {
+            $result = $this->list2tree($result);
+        }
+        return $result;
+    }
+
+
     public function getLocation($ipAddress = '')
     {
         if (in_array($ipAddress, ['127.0.0.1'])) {

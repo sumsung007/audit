@@ -36,14 +36,18 @@ class PublicController extends Controller
         }
 
 
+        // TODO::拿Ticket换取资源
+        // $resourceURL = $this->config->sso->BaseURL . '/resources?app=' . $this->config->sso->APPID . '&ticket=' . $ticket;
+        // $resources = file_get_contents($resourceURL); // TODO :: 程序里报错,需要单独拿出来
+        // TODO::接权限控制
+
+
         // 设置SESSION
         $this->session->set('userID', $result['data']['userID']);
         $this->session->set('username', $result['data']['username']);
         $this->session->set('name', $result['data']['name']);
 
 
-        // TODO::拿Ticket换取资源
-        $ResourceURL = $this->config->sso->BaseURL . '/resources?app=' . $this->config->sso->APPID . 'ticket=' . $ticket;
         header('Location:/');
         exit();
     }

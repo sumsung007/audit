@@ -123,6 +123,17 @@ class SsoController extends ControllerBase
 
     public function resourcesAction()
     {
+        $app = $this->request->get('app', 'int');
+        $ticket = $this->request->get('ticket', 'string');
+        $user = $this->authModel->getUserByTicket($ticket);
+        if (!$user) {
+            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+        }
+
+        $result['aclAll'] = $this->authModel->getAclResource(10000, $app);
+        $result['aclAllow'] = $this->authModel->getAclResource($user['id'], $app);
+        $result['menuTree'] = $this->utilsModel->list2tree($this->authModel->getResources($user['id'], $app));
+        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $result));
     }
 
 }
