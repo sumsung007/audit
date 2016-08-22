@@ -29,7 +29,7 @@ class SecurityPlugin extends Plugin
         if (!$config->setting->appDebug) {
             $dispatcher->forward([
                 'namespace' => 'MyApp\Controllers',
-                'controller' => 'tips',
+                'controller' => 'public',
                 'action' => 'show404'
             ]);
             return false;
@@ -72,9 +72,24 @@ class SecurityPlugin extends Plugin
             'contact' => array('index'),
             'public' => array('login', 'logout')
         );
-        $authModel = new Auth();
-        $privateResources = $authModel->getAclResource($userID, $app);
-        $allResources = $authModel->getAclResource(10000, $app);
+
+
+        // 资源
+        if ($this->config->setting->RBAC) {
+            // 使用自己的权限控制
+            $authModel = new Auth();
+            $privateResources = $authModel->getAclResource($userID, $app);
+            $allResources = $authModel->getAclResource(10000, $app);
+        } else {
+            // 使用BOSS中心的权限控制
+            $resources = $this->session->get('resources');
+            if (!$resources) {
+                header('Location:/login');
+                exit();
+            }
+            $privateResources = $resources['aclAllow'];
+            $allResources = $resources['aclAll'];
+        }
 
 
         // 添加角色
@@ -134,8 +149,8 @@ class SecurityPlugin extends Plugin
         }
         $action = $dispatcher->getActionName();
 
-        // 不检查Tips控制器, 防止forward后二次检查
-        if ($controller == 'tips') {
+        // 不检查public 与 api/sso控制器, 防止forward后二次检查
+        if (in_array($controller, ['public', 'api/sso'])) {
             return true;
         }
 
@@ -153,7 +168,7 @@ class SecurityPlugin extends Plugin
         if ($acl->isResource($controller) != $acl->isAllowed($role, $controller, $action)) {
             $dispatcher->forward([
                 'namespace' => 'MyApp\Controllers',
-                'controller' => 'tips',
+                'controller' => 'public',
                 'action' => 'show401'
             ]);
             return false;

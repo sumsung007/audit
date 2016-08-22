@@ -23,7 +23,7 @@ class Utils extends Model
         );
         DI::getDefault()->get('cookies')->set('flash', $flash, time() + 30);
         DI::getDefault()->get('cookies')->send();
-        header('Location:/tips');
+        header('Location:/public/tips');
         exit();
     }
 

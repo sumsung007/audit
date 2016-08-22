@@ -36,10 +36,14 @@ class PublicController extends Controller
         }
 
 
-        // TODO::拿Ticket换取资源
-        // $resourceURL = $this->config->sso->BaseURL . '/resources?app=' . $this->config->sso->APPID . '&ticket=' . $ticket;
-        // $resources = file_get_contents($resourceURL); // TODO :: 程序里报错,需要单独拿出来
-        // TODO::接权限控制
+        // TODO::拿Ticket换取资源 增加APPKEY
+        $resourceURL = $this->config->sso->BaseURL . '/resources?app=' . $this->config->sso->APPID . '&ticket=' . $ticket;
+        $resources = json_decode(file_get_contents($resourceURL), true);
+        if ($resources['code'] != 0) {
+            Utils::tips('warning', 'Error When Get Resources');
+        } else {
+            $this->session->set('resources', $resources['data']);
+        }
 
 
         // 设置SESSION
@@ -57,6 +61,35 @@ class PublicController extends Controller
     {
         $this->session->destroy();
         Utils::tips('info', 'Logout Page');
+    }
+
+
+    public function tipsAction()
+    {
+        $flashData = json_decode(trim($this->cookies->get('flash')->getValue()), true);
+        $this->view->tips = $flashData;
+        $this->view->pick("public/tips");
+    }
+
+
+    public function show401Action()
+    {
+        $this->view->message = 'Error 401, No Permission';
+        $this->view->pick("public/errors");
+    }
+
+
+    public function show404Action()
+    {
+        $this->view->message = 'Error 404, Not Found';
+        $this->view->pick("public/errors");
+    }
+
+
+    public function exceptionAction()
+    {
+        $this->view->message = 'Error 400, Exception Occurs';
+        $this->view->pick("public/errors");
     }
 
 

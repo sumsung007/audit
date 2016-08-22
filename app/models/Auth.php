@@ -124,7 +124,7 @@ class Auth extends Model
     {
         $sql = "SELECT `roleID` FROM `userRole` WHERE userID=:userID";
         $bind = array('userID' => $userID);
-        $query = $this->dbConnection->query($sql, $bind);
+        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         $data = $query->fetchAll();
         if (!$data) {
@@ -149,7 +149,7 @@ class Auth extends Model
                 WHERE res.status=1 AND res.app=:app
                 ORDER BY res.sort DESC";
             $bind = array('app' => $app);
-            $query = $this->dbConnection->query($sql, $bind);
+            $query = DI::getDefault()->get('dbData')->query($sql, $bind);
             $query->setFetchMode(Db::FETCH_ASSOC);
             return $query->fetchAll();
         }
@@ -165,7 +165,7 @@ class Auth extends Model
                 WHERE rel.resourceID=res.id AND res.status=1 AND rel.roleID IN ($roleID) AND res.app=:app
                 ORDER BY res.sort DESC";
         $bind = array('app' => $app);
-        $query = $this->dbConnection->query($sql, $bind);
+        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         return $query->fetchAll();
     }
