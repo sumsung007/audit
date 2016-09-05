@@ -66,7 +66,7 @@ $di->set('modelsMetadata', function () use ($config) {
 $di->set('modelsCache', function () use ($config) {
     $frontCache = new FrontData(array("lifetime" => $config->setting->cacheTime));
     // Redis Cache
-    if ($config->redis) {
+    if (isset($config->redis)) {
         $cache = new BackRedis($frontCache, array('prefix' => $config->redis->prefix, 'host' => $config->redis->host, 'port' => $config->redis->port, 'index' => $config->redis->index));
         return $cache;
     }
