@@ -82,10 +82,10 @@ $di->set('session', function () {
 }, true);
 
 $di->set('dispatcher', function () {
-    $eventsManager = new EventsManager();
-    $eventsManager->attach('dispatch', new SecurityPlugin);
     $dispatcher = new Dispatcher();
     $dispatcher->setDefaultNamespace('MyApp\Controllers');
+    $eventsManager = new EventsManager();
+    $eventsManager->attach('dispatch', new SecurityPlugin);
     $dispatcher->setEventsManager($eventsManager);
     return $dispatcher;
 }, true);

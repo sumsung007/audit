@@ -11,7 +11,7 @@ class Utils extends Model
 {
 
 
-    static public function tips($type = 'info', $message = '', $seconds = 0, $redirect = '')
+    static public function tips($type = 'info', $message = '', $redirect = '', $seconds = 0)
     {
         $flash = json_encode(
             array(
