@@ -2,6 +2,8 @@
   "require": {
     "filp/whoops": "dev-master",
     "xxtime/component": "dev-master",
+    "endroid/qrcode": "dev-master",
+    "phpgangsta/googleauthenticator": "dev-master",
     "geoip2/geoip2": "dev-master"
   }
 }

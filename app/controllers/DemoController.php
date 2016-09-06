@@ -8,6 +8,8 @@ use Phalcon\Mvc\Dispatcher;
 use MyApp\Models\Demo;
 use MyApp\Services\Services;
 use Phalcon\Filter;
+use Endroid\QrCode\QrCode;
+use PHPGangsta_GoogleAuthenticator;
 
 
 class DemoController extends Controller
@@ -170,6 +172,43 @@ class DemoController extends Controller
     {
         $this->view->data = time();
         $this->view->pick("demo/template");
+    }
+
+
+    public function qrAction()
+    {
+        // 生成二维码
+        $username = urlencode('账号：') . 'joe@xxtime.com';
+        $secretKey = 'DPI45HCE';
+        $url = "otpauth://totp/{$username}?secret={$secretKey}&issuer=" . urlencode('XXTIME.COM');
+        $qrCode = new QrCode();
+        $qrCode
+            ->setText($url)
+            ->setSize(200)
+            ->setPadding(10)
+            ->setErrorCorrection('low')
+            ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+            ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+            //->setLabel('xxtime.com')
+            //->setLabelFontSize(8)
+            ->setImageType(QrCode::IMAGE_TYPE_PNG);
+        header('Content-Type: ' . $qrCode->getContentType());
+        $qrCode->render();
+        exit;
+
+
+        // 验证
+        $totp = new PHPGangsta_GoogleAuthenticator();
+        $secretKey = $totp->createSecret(32);
+        $oneCode = $totp->getCode($secretKey);
+        $checkResult = $totp->verifyCode($secretKey, $oneCode, 2);    // 2 = 2*30sec clock tolerance
+        if ($checkResult) {
+            echo 'OK';
+            dd($secret, $oneCode);
+        } else {
+            echo 'FAILED';
+        }
+        exit;
     }
 
 }
