@@ -38,7 +38,11 @@ class Auth extends Model
      */
     public function getUser($username = '')
     {
-        $sql = "SELECT * FROM `users` WHERE username=:username";
+        if (intval($username) > 0) {
+            $sql = "SELECT * FROM `users` WHERE id=:username";
+        } else {
+            $sql = "SELECT * FROM `users` WHERE username=:username";
+        }
         $bind = array('username' => $username);
         $query = $this->dbConnection->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
@@ -73,6 +77,20 @@ class Auth extends Model
     {
         $data['createdTime'] = date('Y-m-d H:i:s');
         $this->dbConnection->insertAsDict("logsLogin", $data);
+    }
+
+
+    /**
+     * 设置二次验证secretKey
+     * @param int $userID
+     * @param string $secretKey
+     * @return mixed
+     */
+    public function setOTPKey($userID = 0, $secretKey = '')
+    {
+        $sql = "UPDATE `users` SET `secretKey`=:secretKey WHERE id=:id AND `secretKey`=''";
+        $bind = array('id' => $userID, 'secretKey' => $secretKey);
+        return $this->dbConnection->execute($sql, $bind);
     }
 
 

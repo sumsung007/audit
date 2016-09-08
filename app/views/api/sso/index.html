@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: brandon-grotesque;
-            src: url("/assets/fonts/Brandon-Grotesque-Medium.ttf")
+            src: url("/assets/fonts/Brandon-Grotesque-Light.ttf")
         }
 
         body {
@@ -15,8 +15,7 @@
         }
 
         div.container {
-            font-size: 18px;
-            color: #FF8C05;
+            color: #686868;
             margin-top: 100px;
         }
     </style>
@@ -27,23 +26,36 @@
 
     <div class="row">
 
-        <div class="col-md-4"></div>
+        <div class="col-md-3"></div>
 
-        <div class="col-md-4">
-            <form method="post" action="/api/sso">
-                <div class="form-group">
-                    <label for="exampleInputEmail1">Email address</label>
-                    <input name="username" type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">账号登录</h3>
                 </div>
-                <div class="form-group">
-                    <label for="exampleInputPassword1">Password</label>
-                    <input name="password" type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                <div class="panel-body">
+                    <br/>
+                    <form method="post" action="/api/sso">
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">邮件账号</label>
+                            <input name="username" type="email" class="form-control" id="exampleInputEmail1" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">账号密码</label>
+                            <input name="password" type="password" class="form-control" id="exampleInputPassword1" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success btn-block">登录</button>
+                        </div>
+                        <div class="text-right">
+                            <a href="javascript:void(0);">忘记密码？</a>
+                        </div>
+                    </form>
                 </div>
-                <button type="submit" class="btn btn-info btn-block">Login</button>
-            </form>
+            </div>
         </div>
 
-        <div class="col-md-4"></div>
+        <div class="col-md-3"></div>
 
     </div>
 

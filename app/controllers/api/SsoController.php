@@ -4,6 +4,8 @@ namespace MyApp\Controllers\Api;
 
 use MyApp\Models\Auth;
 use MyApp\Models\Utils;
+use Endroid\QrCode\QrCode;
+use PHPGangsta_GoogleAuthenticator;
 
 class SsoController extends ControllerBase
 {
@@ -44,18 +46,18 @@ class SsoController extends ControllerBase
 
 
             // 查询用户
-            $user = $this->authModel->getUser($username);
-            if (!$user) {
+            $userData = $this->authModel->getUser($username);
+            if (!$userData) {
                 Utils::tips('warning', 'User Is Not Exist');
             }
 
 
             // 验证密码
-            $verifyResult = password_verify($password, $user['password']);
+            $verifyResult = password_verify($password, $userData['password']);
 
             // 登录日志
             $log = array(
-                'userID' => $user['id'],
+                'userID' => $userData['id'],
                 'IP' => $ipAddress,
                 'location' => $this->utilsModel->getLocation($ipAddress),
                 'userAgent' => $userAgent,
@@ -68,29 +70,41 @@ class SsoController extends ControllerBase
                 Utils::tips('warning', 'Password Error');
             }
 
-            if ($user['status'] != 1) {
+            if ($userData['status'] != 1) {
                 Utils::tips('warning', 'The User Is Limited');
             }
 
 
             // 设置SESSION
-            $this->session->set('userID', $user['id']);
-            $this->session->set('username', $user['username']);
-            $this->session->set('name', $user['name']);
+            $this->session->set('userID', $userData['id']);
+            $this->session->set('username', $userData['username']);
+            $this->session->set('name', $userData['name']);
 
 
             // 生成Ticket
-            $ticket = $this->authModel->createTicket($user['id']);
+            $ticket = $this->authModel->createTicket($userData['id']);
 
 
             // 回调地址
-            $redirect = urldecode(substr($referer, strpos($referer, 'redirect=') + 9));
+            if (strpos($referer, 'redirect=') === false) {
+                $redirect = $_SERVER['HTTP_ORIGIN'] . '/login';
+            } else {
+                $redirect = urldecode(substr($referer, strpos($referer, 'redirect=') + 9));
+            }
             if (strpos($redirect, '?')) {
                 $redirect .= '&ticket=' . $ticket;
             } else {
                 $redirect .= '?ticket=' . $ticket;
             }
-            header("Location:" . $redirect);
+
+
+            // 检查令牌
+            if (empty($userData['secretKey'])) {
+                header("Location:" . $redirect);
+            } else {
+                $this->session->set('redirect', $redirect);
+                header("Location: /api/sso/OTPAuth");
+            }
             exit();
         }
 
@@ -99,9 +113,76 @@ class SsoController extends ControllerBase
     }
 
 
+    public function OTPAuthAction()
+    {
+        $redirect = $this->session->get('redirect');
+        if (!$redirect) {
+            header('Location: /api/sso/login');
+            exit();
+        }
+        if ($_POST) {
+            $code = $this->request->get('code', 'int');
+
+            $userID = $this->session->get('userID');
+            $user = $this->authModel->getUser($userID);
+
+            $otp = new PHPGangsta_GoogleAuthenticator();
+            $checkResult = $otp->verifyCode($user['secretKey'], $code, 2);    // 2 = 2*30sec clock tolerance
+            $this->session->set('redirect', null);
+            if (!$checkResult) {
+                Utils::tips('warning', 'Authenticator Code Is Error');
+            }
+            header("Location:" . $redirect);
+            exit();
+        }
+        $this->view->pick('sso/OTPAuth');
+    }
+
+
     public function logoutAction()
     {
         $this->session->destroy();
+    }
+
+
+    public function qrAction()
+    {
+        $username = $this->session->get('username');
+        if (!$username) {
+            exit('No Permission');
+        }
+
+        // 二维码生成与验证
+        $otp = new PHPGangsta_GoogleAuthenticator();
+        if ($_POST) { // 验证 开启二次验证是否正确
+            $code = $this->request->get('code', 'int');
+            $secretKey = $this->session->get('secretKey');
+            $checkResult = $otp->verifyCode($secretKey, $code, 2);
+            if (!$checkResult) {
+                Utils::outputJSON(array('code' => 0, 'message' => 'Verify Success'));
+                $userID = $this->session->get('userID');
+                $this->authModel->setOTPKey($userID, $secretKey);
+            }
+            Utils::outputJSON(array('code' => 1, 'message' => 'Verify Failed'));
+        }
+        $secretKey = $otp->createSecret(32);
+        $this->session->set('secretKey', $secretKey);
+        $username = urlencode('账号：') . $username;
+        $url = "otpauth://totp/{$username}?secret={$secretKey}&issuer=" . urlencode('XXTIME.COM');
+        $qrCode = new QrCode();
+        $qrCode
+            ->setText($url)
+            ->setSize(200)
+            ->setPadding(10)
+            ->setErrorCorrection('low')
+            ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+            ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+            //->setLabel('xxtime.com')
+            //->setLabelFontSize(8)
+            ->setImageType(QrCode::IMAGE_TYPE_PNG);
+        header('Content-Type: ' . $qrCode->getContentType());
+        $qrCode->render();
+        exit;
     }
 
 
