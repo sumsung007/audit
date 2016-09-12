@@ -66,9 +66,14 @@ class PublicController extends Controller
 
     public function tipsAction()
     {
+        $type = $this->request->get('type', 'string');
         $flashData = json_decode(trim($this->cookies->get('flash')->getValue()), true);
         $this->view->tips = $flashData;
-        $this->view->pick("public/tips");
+        if ($type == 'ajax') {
+            $this->view->pick("public/tipsAjax");
+        } else {
+            $this->view->pick("public/tips");
+        }
     }
 
 

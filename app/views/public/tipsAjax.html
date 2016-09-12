@@ -24,20 +24,17 @@
             <div class="col-md-12" style="padding-left:0px;margin-left: -10px;">
                 <div>
                     <h3>
-                        {%if tips['type']=='error'%}
-                        <i class="fa fa-times icon  text-danger" style="font-size: 80px;"></i>
-                        {% else %}
-                        <i class="fa fa-check icon text-success" style="font-size: 80px;"></i>
-                        {% endif %}
-
-                        {% if tips['message'] %}
-                        {{tips['message']}}
-                        {% else %}Operation Is completed
-                        {% endif %}
+                        <span data-ng-if="code==0">
+                            <i class="fa fa-check icon text-success" style="font-size: 80px;"></i>
+                        </span>
+                        <span data-ng-if="code!=0">
+                            <i class="fa fa-times icon  text-danger" style="font-size: 80px;"></i>
+                        </span>
+                        {!message!}
                     </h3>
                     <div>
-                        The Page Will Redirect After <b id="wait">{%if tips['seconds'] %}{{tips['seconds']}} {% else %} 3 {% endif %}</b> Seconds,
-                        Click <a id="href" href='{{tips['redirect']}}'><b>Here</b></a> If Not.
+                        The Page Will Redirect After <b id="wait"> 3 </b> Seconds,
+                        Click <a id="href" href='{!redirect!}'><b>Here</b></a> If Not.
                     </div>
                 </div>
             </div>
@@ -47,6 +44,14 @@
 </div>
 
 <script type="text/javascript">
+    'use strict';
+    app.controller('MyFormCtrl', ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+        $scope.code = $stateParams.code;
+        $scope.message = $stateParams.message;
+        $scope.redirect = $stateParams.redirect;
+    }]);
+
+
     (function(){
         var wait = document.getElementById('wait'),href = document.getElementById('href').href;
         var interval = setInterval(function(){
