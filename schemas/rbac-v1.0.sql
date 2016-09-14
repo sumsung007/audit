@@ -139,6 +139,7 @@ CREATE TABLE `users` (
   `password` varchar(225) DEFAULT '',
   `name` varchar(64) DEFAULT '',
   `status` tinyint(3) DEFAULT '1',
+  `phone` varchar(20) DEFAULT '',
   `secretKey` varchar(64) DEFAULT '',
   `createdTime` datetime DEFAULT '0000-01-01 00:00:00',
   `updatedTime` datetime DEFAULT '0000-01-01 00:00:00'
