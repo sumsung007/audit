@@ -26,8 +26,8 @@ class Auth extends Model
 
     public function initialize()
     {
-        $this->setConnectionService('dbData');
-        $this->dbConnection = DI::getDefault()->get('dbData');
+        $this->setConnectionService('dbBackend');
+        // $this->dbConnection = DI::getDefault()->get('dbBackend');
     }
 
 
@@ -44,7 +44,7 @@ class Auth extends Model
             $sql = "SELECT * FROM `users` WHERE username=:username";
         }
         $bind = array('username' => $username);
-        $query = $this->dbConnection->query($sql, $bind);
+        $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         $data = $query->fetch();
         return $data;
@@ -62,7 +62,7 @@ class Auth extends Model
         $sql = "SELECT u.* FROM `users` u, `tickets` t WHERE u.id=t.userID AND t.ticket=:ticket AND t.createdTime>'$dateTime'";
         $bind = array('ticket' => $ticket);
         // TODO :: 此处如使用$this->dbConnection时,外部程序使用file_get_contents(VerifyURL)调用时报错,直接访问VerifyURL没问题
-        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
+        $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         $data = $query->fetch();
         return $data;
@@ -76,7 +76,7 @@ class Auth extends Model
     public function logsLogin($data = [])
     {
         $data['createdTime'] = date('Y-m-d H:i:s');
-        $this->dbConnection->insertAsDict("logsLogin", $data);
+        DI::getDefault()->get('dbBackend')->insertAsDict("logsLogin", $data);
     }
 
 
@@ -90,7 +90,7 @@ class Auth extends Model
     {
         $sql = "UPDATE `users` SET `secretKey`=:secretKey WHERE id=:id AND `secretKey`=''";
         $bind = array('id' => $userID, 'secretKey' => $secretKey);
-        return $this->dbConnection->execute($sql, $bind);
+        return DI::getDefault()->get('dbBackend')->execute($sql, $bind);
     }
 
 
@@ -104,7 +104,7 @@ class Auth extends Model
         $dateTime = date('Y-m-d H:i:s', time() - 600);
         $sql = "SELECT COUNT(1) count FROM `logsLogin` WHERE IP=:IP AND result=0 AND createdTime>'$dateTime'";
         $bind = array('IP' => $IP);
-        $query = $this->dbConnection->query($sql, $bind);
+        $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         $data = $query->fetch();
         if ($data['count'] < 5) {
@@ -128,7 +128,7 @@ class Auth extends Model
             'ticket' => $ticket,
             'createdTime' => date('Y-m-d H:i:s')
         ];
-        $this->dbConnection->insertAsDict("tickets", $data);
+        DI::getDefault()->get('dbBackend')->insertAsDict("tickets", $data);
         return $ticket;
     }
 
@@ -142,7 +142,7 @@ class Auth extends Model
     {
         $sql = "SELECT `roleID` FROM `userRole` WHERE userID=:userID";
         $bind = array('userID' => $userID);
-        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
+        $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         $data = $query->fetchAll();
         if (!$data) {
@@ -167,7 +167,7 @@ class Auth extends Model
                 WHERE res.status=1 AND res.app=:app
                 ORDER BY res.sort DESC";
             $bind = array('app' => $app);
-            $query = DI::getDefault()->get('dbData')->query($sql, $bind);
+            $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
             $query->setFetchMode(Db::FETCH_ASSOC);
             return $query->fetchAll();
         }
@@ -183,7 +183,7 @@ class Auth extends Model
                 WHERE rel.resourceID=res.id AND res.status=1 AND rel.roleID IN ($roleID) AND res.app=:app
                 ORDER BY res.sort DESC";
         $bind = array('app' => $app);
-        $query = DI::getDefault()->get('dbData')->query($sql, $bind);
+        $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
         return $query->fetchAll();
     }

@@ -119,14 +119,14 @@ $di->set('dbData', function () use ($config, $eventsManager) {
     return $connection;
 }, true);
 
-$di->set('dbSetting', function () use ($config, $eventsManager) {
+$di->set('dbBackend', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
-			'host'      =>  $config->db_setting->host,
-			'username'  =>  $config->db_setting->username,
-			'password'  =>  $config->db_setting->password,
-			'dbname'    =>  $config->db_setting->dbname,
-			'charset'   =>  $config->db_setting->charset
-	));
+        'host'      =>  $config->db_backend->host,
+        'username'  =>  $config->db_backend->username,
+        'password'  =>  $config->db_backend->password,
+        'dbname'    =>  $config->db_backend->dbname,
+        'charset'   =>  $config->db_backend->charset
+    ));
     $connection->setEventsManager($eventsManager);
     return $connection;
 }, true);
