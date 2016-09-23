@@ -59,7 +59,7 @@ class Auth extends Model
     public function getUserByTicket($ticket = '')
     {
         $dateTime = date('Y-m-d H:i:s', time() - 60);
-        $sql = "SELECT u.* FROM `users` u, `tickets` t WHERE u.id=t.userID AND t.ticket=:ticket AND t.createdTime>'$dateTime'";
+        $sql = "SELECT u.* FROM `users` u, `tickets` t WHERE u.id=t.userID AND t.ticket=:ticket AND t.createTime>'$dateTime'";
         $bind = array('ticket' => $ticket);
         // TODO :: 此处如使用$this->dbConnection时,外部程序使用file_get_contents(VerifyURL)调用时报错,直接访问VerifyURL没问题
         $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
@@ -75,7 +75,7 @@ class Auth extends Model
      */
     public function logsLogin($data = [])
     {
-        $data['createdTime'] = date('Y-m-d H:i:s');
+        $data['createTime'] = date('Y-m-d H:i:s');
         DI::getDefault()->get('dbBackend')->insertAsDict("logsLogin", $data);
     }
 
@@ -102,7 +102,7 @@ class Auth extends Model
     public function checkIP($IP = '')
     {
         $dateTime = date('Y-m-d H:i:s', time() - 600);
-        $sql = "SELECT COUNT(1) count FROM `logsLogin` WHERE IP=:IP AND result=0 AND createdTime>'$dateTime'";
+        $sql = "SELECT COUNT(1) count FROM `logsLogin` WHERE IP=:IP AND result=0 AND createTime>'$dateTime'";
         $bind = array('IP' => $IP);
         $query = DI::getDefault()->get('dbBackend')->query($sql, $bind);
         $query->setFetchMode(Db::FETCH_ASSOC);
@@ -126,7 +126,7 @@ class Auth extends Model
         $data = [
             'userID' => $userID,
             'ticket' => $ticket,
-            'createdTime' => date('Y-m-d H:i:s')
+            'createTime' => date('Y-m-d H:i:s')
         ];
         DI::getDefault()->get('dbBackend')->insertAsDict("tickets", $data);
         return $ticket;
