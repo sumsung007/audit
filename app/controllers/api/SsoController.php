@@ -100,6 +100,7 @@ class SsoController extends ControllerBase
 
             // 检查令牌
             if (empty($userData['secretKey'])) {
+                $this->session->set('isLogin', 1);
                 header("Location:" . $redirect);
             } else {
                 $this->session->set('redirect', $redirect);
@@ -132,6 +133,7 @@ class SsoController extends ControllerBase
             if (!$checkResult) {
                 Utils::tips('warning', 'Authenticator Code Is Error');
             }
+            $this->session->set('isLogin', 1);
             header("Location:" . $redirect);
             exit();
         }

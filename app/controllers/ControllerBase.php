@@ -46,7 +46,7 @@ class ControllerBase extends Controller
 
         // 检查登录
         $this->_userID = $this->session->get('userID');
-        if (!$this->_userID) {
+        if (!$this->_userID || !$this->session->get('isLogin')) {
             header('Location:/login');
             exit;
         }
