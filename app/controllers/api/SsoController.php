@@ -40,7 +40,7 @@ class SsoController extends ControllerBase
 
 
             // 安全检查 TODO::验证码
-            if (!$this->authModel->checkIP($ipAddress)) {
+            if (!$this->authModel->checkLoginTimes($ipAddress)) {
                 Utils::tips('warning', 'Login Failed Too Much Time');
             }
 

@@ -99,7 +99,7 @@ class Auth extends Model
      * @param string $IP
      * @return bool
      */
-    public function checkIP($IP = '')
+    public function checkLoginTimes($IP = '')
     {
         $dateTime = date('Y-m-d H:i:s', time() - 600);
         $sql = "SELECT COUNT(1) count FROM `logsLogin` WHERE IP=:IP AND result=0 AND createTime>'$dateTime'";
