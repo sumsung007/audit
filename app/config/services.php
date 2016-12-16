@@ -21,13 +21,16 @@ use Phalcon\DI\FactoryDefault,
 //$di = new Phalcon\Di();
 $di = new FactoryDefault();
 
+
 $di->set('config', function () use ($config) {
     return $config;
 }, true);
 
+
 $di->set('router', function () {
     return require __DIR__ . '/routes.php';
 }, true);
+
 
 $di->set('crypt', function () use ($config) {
     $crypt = new Crypt();
@@ -35,11 +38,13 @@ $di->set('crypt', function () use ($config) {
     return $crypt;
 }, true);
 
+
 $di->set('url', function () use ($config) {
     $url = new UrlResolver();
     $url->setBaseUri($config->application->baseUri);
     return $url;
 }, true);
+
 
 $di->set('view', function () use ($config) {
     $view = new View();
@@ -58,9 +63,11 @@ $di->set('view', function () use ($config) {
     return $view;
 }, true);
 
+
 $di->set('modelsMetadata', function () use ($config) {
     return new MetaDataAdapter();
 }, true);
+
 
 // link https://docs.phalconphp.com/zh/latest/reference/cache.html
 $di->set('modelsCache', function () use ($config) {
@@ -81,25 +88,32 @@ $di->set('modelsCache', function () use ($config) {
     return $cache;
 }, true);
 
+
 $di->set('session', function () {
     $session = new SessionAdapter();
     $session->start();
     return $session;
 }, true);
 
-$di->set('dispatcher', function () {
+
+// Events Manager
+$eventsManager = new EventsManager();
+
+
+// Dispatcher
+$di->set('dispatcher', function () use ($config, $eventsManager) {
     $dispatcher = new Dispatcher();
     $dispatcher->setDefaultNamespace('MyApp\Controllers');
-    $eventsManager = new EventsManager();
-    $eventsManager->attach('dispatch', new SecurityPlugin);
-    $dispatcher->setEventsManager($eventsManager);
+    if ($config->setting->securityPlugin) {
+        $eventsManager->attach('dispatch', new SecurityPlugin);
+        $dispatcher->setEventsManager($eventsManager);
+    }
     return $dispatcher;
 }, true);
 
 
-// Events Manager
+// Database Event
 // https://docs.phalconphp.com/zh/latest/reference/dispatching.html#dispatch-loop-events
-$eventsManager = new EventsManager();
 $eventsManager->attach('db', function ($event, $connection) use ($config) {
     if ($event->getType() == 'beforeQuery') {
         if ($config->setting->recordSQL) {
@@ -111,6 +125,7 @@ $eventsManager->attach('db', function ($event, $connection) use ($config) {
         }
     }
 });
+
 
 // Database connection
 $di->set('dbData', function () use ($config, $eventsManager) {
@@ -125,6 +140,7 @@ $di->set('dbData', function () use ($config, $eventsManager) {
     return $connection;
 }, true);
 
+
 $di->set('dbBackend', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
         'host'     => $config->db_backend->host,
@@ -136,6 +152,7 @@ $di->set('dbBackend', function () use ($config, $eventsManager) {
     $connection->setEventsManager($eventsManager);
     return $connection;
 }, true);
+
 
 $di->set('dbLog', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(

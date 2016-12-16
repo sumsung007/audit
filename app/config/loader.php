@@ -30,16 +30,15 @@ if (!file_exists(BASE_DIR . '/vendor/autoload.php')) {
     die('The project needs Composer, please check vendor directory');
 }
 include_once BASE_DIR . '/vendor/autoload.php';
-if ($config->setting->appDebug == true) {
+if ($config->setting->sandbox == true) {
     include BASE_DIR . $config->application->pluginsDir . 'Exception.php';
 }
 
 
-// set error_reporting
-switch ($config->setting->appDebug) {
+// sandbox
+switch ($config->setting->sandbox) {
     case true:
-        //error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-        error_reporting(E_ALL);
+        error_reporting(E_ALL); //error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
         break;
     default:
         header_remove('X-Powered-By');
