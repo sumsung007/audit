@@ -45,10 +45,10 @@ $di->set('view', function () use ($config) {
     $view = new View();
     $view->setViewsDir(BASE_DIR . $config->application->viewsDir);
     $view->registerEngines(array(
-        '.html' => function ($view, $di) use ($config) {
+        '.html'  => function ($view, $di) use ($config) {
             $volt = new VoltEngine($view, $di);
             $volt->setOptions(array(
-                'compiledPath' => BASE_DIR . $config->application->cacheDir,
+                'compiledPath'      => BASE_DIR . $config->application->cacheDir,
                 'compiledSeparator' => '_'
             ));
             return $volt;
@@ -67,11 +67,17 @@ $di->set('modelsCache', function () use ($config) {
     $frontCache = new FrontData(array("lifetime" => $config->setting->cacheTime));
     // Redis Cache
     if (isset($config->redis)) {
-        $cache = new BackRedis($frontCache, array('prefix' => $config->redis->prefix, 'host' => $config->redis->host, 'port' => $config->redis->port, 'index' => $config->redis->index));
+        $cache = new BackRedis($frontCache, array(
+            'prefix' => $config->redis->prefix,
+            'host'   => $config->redis->host,
+            'port'   => $config->redis->port,
+            'index'  => $config->redis->index
+        ));
         return $cache;
     }
     // File Cache
-    $cache = new BackFile($frontCache, array('prefix' => 'cache_', 'cacheDir' => BASE_DIR . $config->application->cacheDir));
+    $cache = new BackFile($frontCache,
+        array('prefix' => 'cache_', 'cacheDir' => BASE_DIR . $config->application->cacheDir));
     return $cache;
 }, true);
 
@@ -109,36 +115,36 @@ $eventsManager->attach('db', function ($event, $connection) use ($config) {
 // Database connection
 $di->set('dbData', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
-			'host'      =>  $config->db_data->host,
-			'username'  =>  $config->db_data->username,
-			'password'  =>  $config->db_data->password,
-			'dbname'    =>  $config->db_data->dbname,
-			'charset'   =>  $config->db_data->charset
-	));
+        'host'     => $config->db_data->host,
+        'username' => $config->db_data->username,
+        'password' => $config->db_data->password,
+        'dbname'   => $config->db_data->dbname,
+        'charset'  => $config->db_data->charset
+    ));
     $connection->setEventsManager($eventsManager);
     return $connection;
 }, true);
 
 $di->set('dbBackend', function () use ($config, $eventsManager) {
     $connection = new DbAdapter(array(
-        'host'      =>  $config->db_backend->host,
-        'username'  =>  $config->db_backend->username,
-        'password'  =>  $config->db_backend->password,
-        'dbname'    =>  $config->db_backend->dbname,
-        'charset'   =>  $config->db_backend->charset
+        'host'     => $config->db_backend->host,
+        'username' => $config->db_backend->username,
+        'password' => $config->db_backend->password,
+        'dbname'   => $config->db_backend->dbname,
+        'charset'  => $config->db_backend->charset
     ));
     $connection->setEventsManager($eventsManager);
     return $connection;
 }, true);
 
 $di->set('dbLog', function () use ($config, $eventsManager) {
-    $connection= new DbAdapter(array(
-			'host'      =>  $config->db_log->host,
-			'username'  =>  $config->db_log->username,
-			'password'  =>  $config->db_log->password,
-			'dbname'    =>  $config->db_log->dbname,
-			'charset'   =>  $config->db_log->charset
-	));
+    $connection = new DbAdapter(array(
+        'host'     => $config->db_log->host,
+        'username' => $config->db_log->username,
+        'password' => $config->db_log->password,
+        'dbname'   => $config->db_log->dbname,
+        'charset'  => $config->db_log->charset
+    ));
     $connection->setEventsManager($eventsManager);
     return $connection;
 }, true);
