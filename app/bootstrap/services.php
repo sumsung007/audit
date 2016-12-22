@@ -32,28 +32,28 @@ $di->set('router', function () {
 }, true);
 
 
-$di->set('crypt', function () use ($config) {
+$di->set('crypt', function () use ($di) {
     $crypt = new Crypt();
-    $crypt->setKey($config->setting->cryptKey);
+    $crypt->setKey($di['config']->setting->cryptKey);
     return $crypt;
 }, true);
 
 
-$di->set('url', function () use ($config) {
+$di->set('url', function () use ($di) {
     $url = new UrlResolver();
-    $url->setBaseUri($config->application->baseUri);
+    $url->setBaseUri($di['config']->application->baseUri);
     return $url;
 }, true);
 
 
-$di->set('view', function () use ($config) {
+$di->set('view', function () use ($di) {
     $view = new View();
-    $view->setViewsDir(BASE_DIR . $config->application->viewsDir);
+    $view->setViewsDir(BASE_DIR . $di['config']->application->viewsDir);
     $view->registerEngines(array(
-        '.html'  => function ($view, $di) use ($config) {
+        '.html'  => function ($view, $di) {
             $volt = new VoltEngine($view, $di);
             $volt->setOptions(array(
-                'compiledPath'      => BASE_DIR . $config->application->cacheDir,
+                'compiledPath'      => BASE_DIR . $di['config']->application->cacheDir,
                 'compiledSeparator' => '_'
             ));
             return $volt;
@@ -64,27 +64,27 @@ $di->set('view', function () use ($config) {
 }, true);
 
 
-$di->set('modelsMetadata', function () use ($config) {
+$di->set('modelsMetadata', function () {
     return new MetaDataAdapter();
 }, true);
 
 
 // link https://docs.phalconphp.com/zh/latest/reference/cache.html
-$di->set('modelsCache', function () use ($config) {
-    $frontCache = new FrontData(array("lifetime" => $config->setting->cacheTime));
+$di->set('modelsCache', function () use ($di) {
+    $frontCache = new FrontData(array("lifetime" => $di['config']->setting->cacheTime));
     // Redis Cache
-    if (isset($config->redis)) {
+    if (isset($di['config']->redis)) {
         $cache = new BackRedis($frontCache, array(
-            'prefix' => $config->redis->prefix,
-            'host'   => $config->redis->host,
-            'port'   => $config->redis->port,
-            'index'  => $config->redis->index
+            'prefix' => $di['config']->redis->prefix,
+            'host'   => $di['config']->redis->host,
+            'port'   => $di['config']->redis->port,
+            'index'  => $di['config']->redis->index
         ));
         return $cache;
     }
     // File Cache
     $cache = new BackFile($frontCache,
-        array('prefix' => 'cache_', 'cacheDir' => BASE_DIR . $config->application->cacheDir));
+        array('prefix' => 'cache_', 'cacheDir' => BASE_DIR . $di['config']->application->cacheDir));
     return $cache;
 }, true);
 
@@ -96,28 +96,64 @@ $di->set('session', function () {
 }, true);
 
 
-// Events Manager
-$eventsManager = new EventsManager();
-
-
 // Dispatcher
-$di->set('dispatcher', function () use ($config, $eventsManager) {
+$di->set('dispatcher', function () use ($di) {
     $dispatcher = new Dispatcher();
     $dispatcher->setDefaultNamespace('MyApp\Controllers');
-    if ($config->setting->securityPlugin) {
-        $eventsManager->attach('dispatch', new SecurityPlugin);
-        $dispatcher->setEventsManager($eventsManager);
+    if ($di['config']->setting->securityPlugin) {
+        $di['eventsManager']->attach('dispatch', new SecurityPlugin);
+        $dispatcher->setEventsManager($di['eventsManager']);
     }
     return $dispatcher;
 }, true);
 
 
+// Database connection
+$di->set('dbData', function () use ($di) {
+    $connection = new DbAdapter(array(
+        'host'     => $di['config']->db_data->host,
+        'username' => $di['config']->db_data->username,
+        'password' => $di['config']->db_data->password,
+        'dbname'   => $di['config']->db_data->dbname,
+        'charset'  => $di['config']->db_data->charset
+    ));
+    $connection->setEventsManager($di['eventsManager']);
+    return $connection;
+}, true);
+
+
+$di->set('dbBackend', function () use ($di) {
+    $connection = new DbAdapter(array(
+        'host'     => $di['config']->db_backend->host,
+        'username' => $di['config']->db_backend->username,
+        'password' => $di['config']->db_backend->password,
+        'dbname'   => $di['config']->db_backend->dbname,
+        'charset'  => $di['config']->db_backend->charset
+    ));
+    $connection->setEventsManager($di['eventsManager']);
+    return $connection;
+}, true);
+
+
+$di->set('dbLog', function () use ($di) {
+    $connection = new DbAdapter(array(
+        'host'     => $di['config']->db_log->host,
+        'username' => $di['config']->db_log->username,
+        'password' => $di['config']->db_log->password,
+        'dbname'   => $di['config']->db_log->dbname,
+        'charset'  => $di['config']->db_log->charset
+    ));
+    $connection->setEventsManager($di['eventsManager']);
+    return $connection;
+}, true);
+
+
 // Database Event
 // https://docs.phalconphp.com/zh/latest/reference/dispatching.html#dispatch-loop-events
-$eventsManager->attach('db', function ($event, $connection) use ($config) {
+$di['eventsManager']->attach('db', function ($event, $connection) use ($di) {
     if ($event->getType() == 'beforeQuery') {
-        if ($config->setting->recordSql) {
-            $logger = new FileLogger(BASE_DIR . $config->application->logsDir . "logsSQL.log");
+        if ($di['config']->setting->recordSql) {
+            $logger = new FileLogger(BASE_DIR . $di['config']->application->logsDir . "logsSql.log");
             $logger->log($connection->getSQLStatement());
         }
         if (preg_match('/drop|alter/i', $connection->getSQLStatement())) {
@@ -125,43 +161,3 @@ $eventsManager->attach('db', function ($event, $connection) use ($config) {
         }
     }
 });
-
-
-// Database connection
-$di->set('dbData', function () use ($config, $eventsManager) {
-    $connection = new DbAdapter(array(
-        'host'     => $config->db_data->host,
-        'username' => $config->db_data->username,
-        'password' => $config->db_data->password,
-        'dbname'   => $config->db_data->dbname,
-        'charset'  => $config->db_data->charset
-    ));
-    $connection->setEventsManager($eventsManager);
-    return $connection;
-}, true);
-
-
-$di->set('dbBackend', function () use ($config, $eventsManager) {
-    $connection = new DbAdapter(array(
-        'host'     => $config->db_backend->host,
-        'username' => $config->db_backend->username,
-        'password' => $config->db_backend->password,
-        'dbname'   => $config->db_backend->dbname,
-        'charset'  => $config->db_backend->charset
-    ));
-    $connection->setEventsManager($eventsManager);
-    return $connection;
-}, true);
-
-
-$di->set('dbLog', function () use ($config, $eventsManager) {
-    $connection = new DbAdapter(array(
-        'host'     => $config->db_log->host,
-        'username' => $config->db_log->username,
-        'password' => $config->db_log->password,
-        'dbname'   => $config->db_log->dbname,
-        'charset'  => $config->db_log->charset
-    ));
-    $connection->setEventsManager($eventsManager);
-    return $connection;
-}, true);
