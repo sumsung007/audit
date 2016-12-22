@@ -116,7 +116,7 @@ $di->set('dispatcher', function () use ($config, $eventsManager) {
 // https://docs.phalconphp.com/zh/latest/reference/dispatching.html#dispatch-loop-events
 $eventsManager->attach('db', function ($event, $connection) use ($config) {
     if ($event->getType() == 'beforeQuery') {
-        if ($config->setting->recordSQL) {
+        if ($config->setting->recordSql) {
             $logger = new FileLogger(BASE_DIR . $config->application->logsDir . "logsSQL.log");
             $logger->log($connection->getSQLStatement());
         }

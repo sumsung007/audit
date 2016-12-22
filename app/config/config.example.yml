@@ -54,8 +54,8 @@ sso:
 application:
     controllersDir  : /app/controllers/
     modelsDir       : /app/models/
-    servicesDir     : /app/services/
     viewsDir        : /app/views/
+    servicesDir     : /app/services/
     pluginsDir      : /app/plugins/
     librariesDir    : /app/libraries/
     cacheDir        : /app/cache/
