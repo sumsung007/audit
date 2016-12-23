@@ -36,12 +36,12 @@ CREATE TABLE `apps` (
 
 
 
-# Dump of table expense201701GMID
+# Dump of table GMID_expense201701
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `expense201701GMID`;
+DROP TABLE IF EXISTS `GMID_expense201701`;
 
-CREATE TABLE `expense201701GMID` (
+CREATE TABLE `GMID_expense201701` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` varchar(32) DEFAULT '',
   `coin` int(11) DEFAULT '0',
