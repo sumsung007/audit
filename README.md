@@ -8,7 +8,7 @@
 
 
 ## 使用方法
-###### 首次安装调试时,需要将配置目录下config.example.ini 修改为config.ini
+###### 首次安装调试时,需要将配置目录下.system.ini 修改为system.ini
 
 * securityPlugin = 0 不启权限控制
 * securityPlugin = 1 使用此系统自带的RBAC权限控制
