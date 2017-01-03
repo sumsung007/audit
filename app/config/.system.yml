@@ -53,4 +53,4 @@ redis:
 
 sso:
     BaseUrl     : http://www.example.com/api/sso/
-    APPID       : 100
+    appId       : 100

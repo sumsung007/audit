@@ -38,7 +38,7 @@ class PublicController extends Controller
 
 
         // TODO::拿Ticket换取资源 增加APPKEY
-        $resourceUrl = $this->config->sso->BaseUrl . '/resources?app=' . $this->config->sso->APPID . '&ticket=' . $ticket;
+        $resourceUrl = $this->config->sso->BaseUrl . '/resources?app=' . $this->config->sso->appId . '&ticket=' . $ticket;
         $resources = json_decode(file_get_contents($resourceUrl), true);
         if ($resources['code'] != 0) {
             Utils::tips('warning', 'Error When Get Resources');
