@@ -7,6 +7,17 @@ setting:
     cacheTime       : 600
     cryptKey        : xxxxxxxxxxxxxxxx
 
+application:
+    controllersDir  : /app/controllers/
+    modelsDir       : /app/models/
+    viewsDir        : /app/views/
+    servicesDir     : /app/services/
+    pluginsDir      : /app/plugins/
+    librariesDir    : /app/libraries/
+    cacheDir        : /app/cache/
+    logsDir         : /app/logs/
+    baseUri         : /api/
+
 db_data:
     adapter     : Mysql
     host        : localhost
@@ -41,16 +52,5 @@ redis:
     prefix      : cache_
 
 sso:
-    BaseURL         : http://www.example.com/api/sso/
-    APPID           : 100
-
-application:
-    controllersDir  : /app/controllers/
-    modelsDir       : /app/models/
-    viewsDir        : /app/views/
-    servicesDir     : /app/services/
-    pluginsDir      : /app/plugins/
-    librariesDir    : /app/libraries/
-    cacheDir        : /app/cache/
-    logsDir         : /app/logs/
-    baseUri         : /api/
+    BaseUrl     : http://www.example.com/api/sso/
+    APPID       : 100
