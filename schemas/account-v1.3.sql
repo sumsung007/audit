@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.9)
 # Database: phalcon_data
-# Generation Time: 2017-01-04 10:19:02 +0000
+# Generation Time: 2017-01-04 11:12:27 +0000
 # ************************************************************
 
 
@@ -39,7 +39,7 @@ CREATE TABLE `accounts` (
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `account` (`account`)
+  UNIQUE KEY `account` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
