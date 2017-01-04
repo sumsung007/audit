@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.9)
 # Database: phalcon_data
-# Generation Time: 2017-01-04 07:54:02 +0000
+# Generation Time: 2017-01-04 08:53:08 +0000
 # ************************************************************
 
 
@@ -20,23 +20,26 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Dump of table oauth_accounts
+# Dump of table accounts
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `oauth_accounts`;
+DROP TABLE IF EXISTS `accounts`;
 
-CREATE TABLE `oauth_accounts` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) DEFAULT '0',
-  `platform` varchar(16) DEFAULT '',
-  `open_id` varchar(32) DEFAULT '',
-  `open_name` varchar(32) DEFAULT '',
-  `access_token` varchar(128) DEFAULT '',
-  `refresh_token` varchar(128) DEFAULT '',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CREATE TABLE `accounts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `account` varchar(64) NOT NULL DEFAULT '',
+  `password` varchar(64) DEFAULT '',
+  `name` varchar(32) DEFAULT '',
+  `status` tinyint(3) unsigned DEFAULT '1',
+  `secret_key` varchar(32) DEFAULT '',
+  `gender` tinyint(3) unsigned DEFAULT '0',
+  `phone` varchar(32) DEFAULT '',
+  `photo` varchar(512) DEFAULT '',
+  `birthday` date DEFAULT '0000-01-01',
+  `create_time` timestamp NULL DEFAULT NULL,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `account` (`open_id`,`platform`),
-  KEY `user_id` (`user_id`)
+  KEY `account` (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -53,6 +56,27 @@ CREATE TABLE `oauth_access_tokens` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `scope` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`access_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+# Dump of table oauth_accounts
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `oauth_accounts`;
+
+CREATE TABLE `oauth_accounts` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned DEFAULT '0',
+  `platform` varchar(16) DEFAULT '',
+  `open_id` varchar(32) DEFAULT '',
+  `open_name` varchar(32) DEFAULT '',
+  `access_token` varchar(128) DEFAULT '',
+  `refresh_token` varchar(128) DEFAULT '',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account` (`open_id`,`platform`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
