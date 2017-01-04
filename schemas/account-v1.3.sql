@@ -55,7 +55,8 @@ CREATE TABLE `oauth_access_tokens` (
   `user_id` varchar(32) DEFAULT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `scope` varchar(1000) DEFAULT NULL,
-  PRIMARY KEY (`access_token`)
+  PRIMARY KEY (`access_token`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
