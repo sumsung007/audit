@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.9)
 # Database: phalcon_data
-# Generation Time: 2017-01-04 08:53:08 +0000
+# Generation Time: 2017-01-04 10:19:02 +0000
 # ************************************************************
 
 
@@ -36,7 +36,7 @@ CREATE TABLE `accounts` (
   `phone` varchar(32) DEFAULT '',
   `photo` varchar(512) DEFAULT '',
   `birthday` date DEFAULT '0000-01-01',
-  `create_time` timestamp NULL DEFAULT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `account` (`account`)
@@ -53,7 +53,7 @@ CREATE TABLE `oauth_access_tokens` (
   `access_token` varchar(40) NOT NULL,
   `client_id` varchar(32) NOT NULL DEFAULT '',
   `user_id` varchar(32) DEFAULT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `scope` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`access_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -73,7 +73,8 @@ CREATE TABLE `oauth_accounts` (
   `open_name` varchar(32) DEFAULT '',
   `access_token` varchar(128) DEFAULT '',
   `refresh_token` varchar(128) DEFAULT '',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account` (`open_id`,`platform`),
   KEY `user_id` (`user_id`)
