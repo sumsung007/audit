@@ -35,12 +35,12 @@ CREATE TABLE `accounts` (
 
 
 
-# Dump of table notice_apps
+# Dump of table notify_apps
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `notice_apps`;
+DROP TABLE IF EXISTS `notify_apps`;
 
-CREATE TABLE `notice_apps` (
+CREATE TABLE `notify_apps` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) DEFAULT '',
   `app_id` varchar(16) DEFAULT '',
@@ -52,12 +52,12 @@ CREATE TABLE `notice_apps` (
 
 
 
-# Dump of table notice_logs
+# Dump of table notify_logs
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `notice_logs`;
+DROP TABLE IF EXISTS `notify_logs`;
 
-CREATE TABLE `notice_logs` (
+CREATE TABLE `notify_logs` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `transaction` varchar(32) DEFAULT '0',
   `notify_url` varchar(1000) DEFAULT '',
