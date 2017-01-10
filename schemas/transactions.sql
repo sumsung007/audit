@@ -20,21 +20,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Dump of table accounts
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `accounts`;
-
-CREATE TABLE `accounts` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) DEFAULT '0',
-  `amount` decimal(10,2) unsigned DEFAULT '0.00',
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
-
 # Dump of table notify_apps
 # ------------------------------------------------------------
 
