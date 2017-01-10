@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.9)
 # Database: audit_system
-# Generation Time: 2016-12-23 08:54:01 +0000
+# Generation Time: 2017-01-10 16:02:39 +0000
 # ************************************************************
 
 
@@ -36,12 +36,12 @@ CREATE TABLE `apps` (
 
 
 
-# Dump of table GMID_exp_201701
+# Dump of table gm_exp_2017q1
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `GMID_exp_201701`;
+DROP TABLE IF EXISTS `gm_exp_2017q1`;
 
-CREATE TABLE `GMID_exp_201701` (
+CREATE TABLE `gm_exp_2017q1` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` varchar(32) DEFAULT '',
   `coin` int(11) DEFAULT '0',
@@ -49,6 +49,20 @@ CREATE TABLE `GMID_exp_201701` (
   `time` datetime DEFAULT '0000-01-01 00:00:00',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Expense Records';
+
+
+
+# Dump of table gm_status_2017q1
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `gm_status_2017q1`;
+
+CREATE TABLE `gm_status_2017q1` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT '',
+  `coin` int(11) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='期末状态';
 
 
 
