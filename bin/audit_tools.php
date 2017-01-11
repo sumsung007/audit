@@ -33,7 +33,8 @@ class AuditTools
 
         // 执行命令
         if (isset($this->option['method'])) {
-            $this->{$this->option['method']};
+            $method = $this->option['method'];
+            $this->$method();
         }
 
         $this->logger('END: Program');
@@ -63,13 +64,15 @@ class AuditTools
     private function getExp()
     {
         $this->logger('START: getExp');
-        foreach ($this->config['servers'] as $server_id => $server) {
-            $fileName = "{$this->config['subject']}_exp_" . intval($server_id / 1000) . '.csv';
-            $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin, reason type, log_time time FROM gold_log WHERE log_time>='{$this->from}' AND log_time<='{$this->to}'";
+        foreach ($this->config['servers'] as $category => $list) {
+            foreach ($list as $server_id => $server) {
+                $fileName = "{$this->config['subject']}_exp_" . $category . '.csv';
+                $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin, reason type, log_time time FROM gold_log WHERE log_time>='{$this->from}' AND log_time<='{$this->to}'";
 
-            // SHELL
-            $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
-            $this->executeShell($shell);
+                // SHELL
+                $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
+                $this->executeShell($shell);
+            }
         }
     }
 
@@ -80,14 +83,17 @@ class AuditTools
     private function getStatus()
     {
         $this->logger('START: getStatus');
-        foreach ($this->config['servers'] as $server_id => $server) {
-            $fileName = "{$this->config['subject']}_status_" . intval($server_id / 1000) . '.csv';
-            $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin FROM role";
+        foreach ($this->config['servers'] as $category => $list) {
+            foreach ($list as $server_id => $server) {
+                $fileName = "{$this->config['subject']}_status_" . $category . '.csv';
+                $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin FROM role";
 
-            // SHELL
-            $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
-            $this->executeShell($shell);
+                // SHELL
+                $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
+                $this->executeShell($shell);
+            }
         }
+
     }
 
 
@@ -139,7 +145,7 @@ class AuditTools
      */
     private function setOptions()
     {
-        $this->option = getopt('i::h::', ['method::']);
+        $this->option = getopt('i::h::', ['method:']);
         if (isset($this->option['h'])) {
             $help = <<<END
 -------------------------------------------
