@@ -31,14 +31,13 @@ class AuditTools
 
 
     /**
-     * 导出订单 TODO :: 服务器ID不匹配  二次处理
+     * 导出订单
      */
     private function getTrade()
     {
         foreach ($this->config['trade'] as $server_id => $server) {
             $fileName = "{$this->config['subject']}_tx_" . $server_id . '.csv';
             $sql = "SELECT CONCAT( server_id,'-',role_id ) user_id, amount, gold_real coin, pay_time time FROM order_log WHERE status='complete' AND pay_time>='{$this->from}' AND pay_time<='{$this->to}'";
-            $sql = "SELECT server_id, role_id, amount, gold_real coin, pay_time time FROM order_log WHERE status='complete' AND pay_time>='{$this->from}' AND pay_time<='{$this->to}'";
 
             // SHELL
             $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
