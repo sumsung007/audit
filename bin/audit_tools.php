@@ -34,7 +34,11 @@ class AuditTools
         // 执行命令
         if (isset($this->option['method'])) {
             $method = $this->option['method'];
-            $this->$method();
+            if (method_exists($this, $method)) {
+                $this->$method();
+                exit();
+            }
+            exit("\r\n" . 'ERROR: no method [' . $method . "]\r\n\r\n");
         }
 
         $this->logger('END: Program');
