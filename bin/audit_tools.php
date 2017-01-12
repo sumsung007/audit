@@ -65,7 +65,7 @@ class AuditTools
     {
         $this->logger('START: outTrade');
         foreach ($this->config['trade'] as $category => $server) {
-            $fileName = "{$this->config['subject']}_{$category}_tx.csv";
+            $fileName = "{$this->config['subject']}_{$category}_trade.csv";
             $sql = "SELECT CONCAT( server_id,'-',role_id ) user_id, amount, gold_real coin, pay_time time FROM order_log WHERE status='complete' AND pay_time>='{$this->from}' AND pay_time<='{$this->to}'";
 
             // SHELL
@@ -114,15 +114,60 @@ class AuditTools
     }
 
 
+    /**
+     * 导入 TODO::订单无coin字段 暂用gateway字段代替
+     */
+    private function inCSV()
+    {
+        $this->logger('START: inTrade');
+        $sql = "mysql -h{$this->config['audit']['host']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} --local-infile=1";
+        dump($sql);
+        foreach ($this->config['trade'] as $category => $nothing) {
+            $file_tr = "{$this->config['subject']}_{$category}_trade.csv";
+            $file_st = "{$this->config['subject']}_{$category}_status.csv";
+            $file_ex = "{$this->config['subject']}_{$category}_exp.csv";
+            $table_tr = "{$this->config['subject']}_trade";
+            $table_st = "{$this->config['subject']}_status";
+            $table_ex = "{$this->config['subject']}_exp";
+            $sql = <<<END
+LOAD DATA LOCAL INFILE '/tmp/$file_tr' INTO TABLE $table_tr CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, amount=@c2, gateway=@c3, time=@c4;
+LOAD DATA LOCAL INFILE '/tmp/$file_st' INTO TABLE $table_st CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2) SET user_id=@c1, coin=@c2;
+LOAD DATA LOCAL INFILE '/tmp/$file_ex' INTO TABLE $table_ex CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, coin=@c2, type=@c3, time=@c4;
+END;
+            dump($sql);
+        }
+        $sql = <<<END
+DELETE FROM `{$this->config['subject']}_trade` WHERE user_id='user_id';
+DELETE FROM `{$this->config['subject']}_status` WHERE user_id='user_id';
+DELETE FROM `{$this->config['subject']}_exp` WHERE user_id='user_id';
+END;
+        dump($sql);
+    }
+
+
     private function fixTrade()
     {
         $this->logger('START: fixTrade');
     }
 
 
+    /**
+     * 删除消耗中的订单记录,然后导入订单到消耗表
+     */
     private function inTrade()
     {
         $this->logger('START: inTrade');
+        $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
+
+        // 清理
+        $sql = "DELETE FROM {$this->config['subject']}_exp WHERE type='1'";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
+        $this->executeShell($shell);
+
+        // 插入
+        $sql = "INSERT INTO {$this->config['subject']}_exp(user_id,coin,type,time) SELECT user_id,gateway,1,time FROM {$this->config['subject']}_trade";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
+        $this->executeShell($shell);
     }
 
 
@@ -196,7 +241,7 @@ class AuditTools
 
 操作步骤：
 1. 导出CSV文件                  从原始数据源导出[outTrade,outExp,outStatus]
-2. 导入CSV文件                  导入到审计数据库
+2. 导入CSV文件  [inCSV]         导入到审计数据库
 3. 修正金额     [fixTrade]      设定目标修正金额 (仅操作订单)
 4. 导入订单     [inTrade]       删除消耗中的订单记录,然后导入订单到消耗表
 5. 手动检查                     检查测试数据,非法超大数据
