@@ -201,15 +201,31 @@ END;
         if (isset($this->pdo[$key])) {
             return $this->pdo[$key];
         }
-        if (!isset($this->config['servers'][$key])) {
+
+        $cfg = null;
+        if (isset($this->config[$key])) {
+            $cfg = $this->config[$key];
+        } elseif (isset($this->config['trade'][$key])) {
+            $cfg = $this->config['trade'][$key];
+        } else {
+            foreach ($this->config['servers'] as $cate => $dbs) {
+                if (array_key_exists($key, $dbs)) {
+                    $cfg = $this->config['servers'][$cate][$key];
+                    break;
+                }
+            }
+        }
+
+        if (!$cfg) {
             $this->logger("no server: {$key}");
         }
+
         $config = [
-            'host'     => $this->config['servers'][$key]['host'],
-            'port'     => $this->config['servers'][$key]['port'],
-            'database' => $this->config['servers'][$key]['db'],
-            'username' => $this->config['servers'][$key]['user'],
-            'password' => $this->config['servers'][$key]['pass'],
+            'host'     => $cfg['host'],
+            'port'     => $cfg['port'],
+            'database' => $cfg['db'],
+            'username' => $cfg['user'],
+            'password' => $cfg['pass'],
         ];
         $this->pdo[$key] = new MySQL($config);
         return $this->pdo[$key];
