@@ -32,11 +32,6 @@ class AuditTools
 
     public function __destruct()
     {
-        $this->_RUN_TIME_END = time();
-        $this->logger('---------------');
-        $this->logger('占用内存: ' . round(memory_get_usage() / 1024 / 1024, 2) . 'M');
-        $this->logger('执行时间: ' . round(($this->_RUN_TIME_END - $this->_RUN_TIME_START) / 60, 2) . '分钟');
-        $this->logger('-----------------------------------------');
     }
 
 
@@ -53,6 +48,13 @@ class AuditTools
                 exit("\r\n" . 'ERROR: no method [' . $method . "]\r\n\r\n");
             }
         }
+
+
+        $this->_RUN_TIME_END = time();
+        $this->logger('---------------');
+        $this->logger('占用内存: ' . round(memory_get_usage() / 1024 / 1024, 2) . 'M');
+        $this->logger('执行时间: ' . round(($this->_RUN_TIME_END - $this->_RUN_TIME_START) / 60, 2) . '分钟');
+        $this->logger('-----------------------------------------');
     }
 
 
