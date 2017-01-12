@@ -16,14 +16,27 @@ class AuditTools
     private $to;
     private $pdo;
     private $option;
+    private $_RUN_TIME_START;
+    private $_RUN_TIME_END;
 
 
     public function __construct()
     {
+        $this->_RUN_TIME_START = time();
         $this->config = include_once 'config.php';
         $this->from = $this->config['from'];
         $this->to = $this->config['to'];
         $this->setOptions();
+    }
+
+
+    public function __destruct()
+    {
+        $this->_RUN_TIME_END = time();
+        $this->logger('---------------');
+        $this->logger('占用内存: ' . round(memory_get_usage() / 1024 / 1024, 2) . 'M');
+        $this->logger('执行时间: ' . round(($this->_RUN_TIME_END - $this->_RUN_TIME_START) / 60, 2) . '分钟');
+        $this->logger('-----------------------------------------');
     }
 
 
@@ -36,12 +49,10 @@ class AuditTools
             $method = $this->option['method'];
             if (method_exists($this, $method)) {
                 $this->$method();
-                exit();
+            } else {
+                exit("\r\n" . 'ERROR: no method [' . $method . "]\r\n\r\n");
             }
-            exit("\r\n" . 'ERROR: no method [' . $method . "]\r\n\r\n");
         }
-
-        $this->logger('END: Program');
     }
 
 
@@ -51,8 +62,8 @@ class AuditTools
     private function outTrade()
     {
         $this->logger('START: outTrade');
-        foreach ($this->config['trade'] as $server_id => $server) {
-            $fileName = "{$this->config['subject']}_tx_" . $server_id . '.csv';
+        foreach ($this->config['trade'] as $category => $server) {
+            $fileName = "{$this->config['subject']}_{$category}_tx.csv";
             $sql = "SELECT CONCAT( server_id,'-',role_id ) user_id, amount, gold_real coin, pay_time time FROM order_log WHERE status='complete' AND pay_time>='{$this->from}' AND pay_time<='{$this->to}'";
 
             // SHELL
@@ -70,7 +81,7 @@ class AuditTools
         $this->logger('START: outExp');
         foreach ($this->config['servers'] as $category => $list) {
             foreach ($list as $server_id => $server) {
-                $fileName = "{$this->config['subject']}_exp_" . $category . '.csv';
+                $fileName = "{$this->config['subject']}_{$category}_exp.csv";
                 $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin, reason type, log_time time FROM gold_log WHERE log_time>='{$this->from}' AND log_time<='{$this->to}'";
 
                 // SHELL
@@ -89,7 +100,7 @@ class AuditTools
         $this->logger('START: outStatus');
         foreach ($this->config['servers'] as $category => $list) {
             foreach ($list as $server_id => $server) {
-                $fileName = "{$this->config['subject']}_status_" . $category . '.csv';
+                $fileName = "{$this->config['subject']}_{$category}_status.csv";
                 $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin FROM role";
 
                 // SHELL
