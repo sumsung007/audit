@@ -48,9 +48,9 @@ class AuditTools
     /**
      * 导出订单
      */
-    private function getTrade()
+    private function outTrade()
     {
-        $this->logger('START: getTrade');
+        $this->logger('START: outTrade');
         foreach ($this->config['trade'] as $server_id => $server) {
             $fileName = "{$this->config['subject']}_tx_" . $server_id . '.csv';
             $sql = "SELECT CONCAT( server_id,'-',role_id ) user_id, amount, gold_real coin, pay_time time FROM order_log WHERE status='complete' AND pay_time>='{$this->from}' AND pay_time<='{$this->to}'";
@@ -65,9 +65,9 @@ class AuditTools
     /**
      * 导出消耗
      */
-    private function getExp()
+    private function outExp()
     {
-        $this->logger('START: getExp');
+        $this->logger('START: outExp');
         foreach ($this->config['servers'] as $category => $list) {
             foreach ($list as $server_id => $server) {
                 $fileName = "{$this->config['subject']}_exp_" . $category . '.csv';
@@ -84,9 +84,9 @@ class AuditTools
     /**
      * 导出期末状态
      */
-    private function getStatus()
+    private function outStatus()
     {
-        $this->logger('START: getStatus');
+        $this->logger('START: outStatus');
         foreach ($this->config['servers'] as $category => $list) {
             foreach ($list as $server_id => $server) {
                 $fileName = "{$this->config['subject']}_status_" . $category . '.csv';
@@ -98,6 +98,30 @@ class AuditTools
             }
         }
 
+    }
+
+
+    private function fixTrade()
+    {
+        $this->logger('START: fixTrade');
+    }
+
+
+    private function inTrade()
+    {
+        $this->logger('START: inTrade');
+    }
+
+
+    private function balanceExp()
+    {
+        $this->logger('START: balanceExp');
+    }
+
+
+    private function moveExp()
+    {
+        $this->logger('START: moveExp');
     }
 
 
@@ -155,16 +179,16 @@ class AuditTools
 -------------------------------------------
 -h          帮助
 -i          显示配置信息
---method    执行特定方法：getTrade、getStatus、getExp
+--method    执行特定方法 例:audit_tools --method outTrade
 
 操作步骤：
-1. 导出CSV数据,从原始数据源导出
-2. 导入CSV文件到审计数据库
-3. 修正金额,设定目标修正金额 (仅操作订单)
-4. 删除消耗中的订单记录,然后插入订单记录到消耗表
-5. 手动检查非法数据 (测试数据,超大数据)
-6. 平衡消耗,没有期末则补充期末 其他情况补消耗 (期初+消耗=期末)
-7. 移动消耗,使其任意时间点(期初+消耗>0)
+1. 导出CSV文件                  从原始数据源导出[outTrade,outExp,outStatus]
+2. 导入CSV文件                  导入到审计数据库
+3. 修正金额     [fixTrade]      设定目标修正金额 (仅操作订单)
+4. 导入订单     [inTrade]       删除消耗中的订单记录,然后导入订单到消耗表
+5. 手动检查                     检查测试数据,非法超大数据
+6. 平衡消耗     [balanceExp]    无期末则补充,其他情况补消耗(期初+消耗=期末)
+7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0)
 -------------------------------------------
 
 END;
