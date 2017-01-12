@@ -174,6 +174,36 @@ END;
     private function balanceExp()
     {
         $this->logger('START: balanceExp');
+        $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
+
+
+        // 准备参数
+        $subject = $this->config['subject'];
+        $q = substr($subject, -1);
+        if ($q == 1) {
+            exit('do something here');
+        }
+        $table_start = substr($subject, 0, -1) . strval($q - 1) . '_status'; //期初表
+        $table_end = $subject . '_status';  // 期末表
+        $table_exp = $subject . '_exp';     // 消耗表
+
+
+        // 期初的用户必须在期末中出现，(仅在有合服时导致有期初无期末,更改用户ID导致)
+        $sql = "INSERT INTO {$table_end}(user_id, coin) SELECT user_id, coin FROM {$table_start} WHERE user_id NOT IN(SELECT user_id FROM {$table_end})";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
+        $this->executeShell($shell);
+
+
+        // TODO :: 清掉exp记录, trade记录 (不在期末, 但在exp表中的记录)  | (outExp,outStatus导出时严格限制充值用户 则不需要此步骤) 也可增加期末状态
+        $sql = "SELECT id FROM $table_exp WHERE user_id NOT IN(SELECT user_id FROM $table_end)";
+        $pdo = $this->getPdo('audit');
+        $ids = $pdo->fetchAll($sql);
+        if ($ids) {
+            $ids = array_column($ids, 'id');
+            $ids = implode(',', $ids);
+            $sql = "DELETE FROM $table_exp WHERE id IN ($ids)";
+            $pdo->execute($sql);
+        }
     }
 
 
