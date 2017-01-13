@@ -204,6 +204,63 @@ END;
             $sql = "DELETE FROM $table_exp WHERE id IN ($ids)";
             $pdo->execute($sql);
         }
+
+
+        // 字典-期初
+        $sql = "SELECT user_id, coin FROM $table_start";
+        $tmp = $pdo->fetchAll($sql);
+        $dict_start = array_column($tmp, 'coin', 'user_id');
+
+
+        // 字典-消耗
+        $sql = "SELECT user_id, SUM(coin) coin FROM $table_exp GROUP BY user_id";
+        $tmp = $pdo->fetchAll($sql);
+        $dict_exp = array_column($tmp, 'coin', 'user_id');
+
+
+        // 循环期末状态
+        $sql_insert = "INSERT INTO {$table_exp}(user_id, coin, type, time) VALUES";
+        $execute = false;
+
+        $sql = "SELECT user_id, coin FROM $table_end";
+        $tmp = $pdo->fetchAll($sql);
+        $dict_end = array_column($tmp, 'coin', 'user_id');
+        foreach ($dict_end as $user_id => $coin_end) {
+            // 无期初
+            if (!isset($dict_start[$user_id])) {
+                $dict_start[$user_id] = 0;
+            }
+            // 无消耗
+            if (!isset($dict_exp[$user_id])) {
+                $dict_exp[$user_id] = 0;
+            }
+            $diff = $coin_end - $dict_start[$user_id] - $dict_exp[$user_id];
+            if ($diff == 0) {
+                continue;
+            }
+
+            $this->logger("balanceExp: {$user_id}");
+            $execute = true;
+            $year = date('Y');
+            $month = date('m', strtotime('-1 month'));
+            $day = rand(1, 28);
+            $hour = rand(0, 22); // 保留移动空间
+            $min = rand(0, 59);
+            $second = rand(0, 59);
+
+            $time = mktime($hour, $min, $second, $month, $day, $year);
+            $date = date('Y-m-d H:i:s', $time);
+
+            $sql_insert .= "('$user_id',$diff,909,'$date'),";
+        }
+        if ($execute) {
+            $sql_insert = substr($sql_insert, 0, -1);
+            $pdo->execute($sql_insert);
+            $this->logger('balanceExp ok');
+        } else {
+            $this->logger('no need balanceExp');
+        }
+
     }
 
 
