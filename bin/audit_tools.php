@@ -125,11 +125,12 @@ class AuditTools
 
 
     /**
+     * 导入数据仅输出SQL命令, 不执行
      * 导入 TODO::订单无coin字段 暂用gateway字段代替
      */
     private function inCSV()
     {
-        $this->logger('START: inTrade');
+        $this->logger('START: inCSV');
         $sql = "mysql -h{$this->config['audit']['host']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} --local-infile=1";
         dump($sql);
         foreach ($this->config['trade'] as $category => $nothing) {
@@ -188,6 +189,7 @@ END;
 
 
         // 准备参数
+        $pdo = $this->pdo('audit');
         $subject = $this->config['subject'];
         $q = substr($subject, -1);
         if ($q == 1) {
@@ -206,7 +208,6 @@ END;
 
         // TODO :: 清掉exp记录, trade记录 (不在期末, 但在exp表中的记录)  | (outExp,outStatus导出时严格限制充值用户 则不需要此步骤) 也可增加期末状态
         $sql = "SELECT id FROM $table_exp WHERE user_id NOT IN(SELECT user_id FROM $table_end)";
-        $pdo = $this->pdo('audit');
         $ids = $pdo->fetchAll($sql);
         if ($ids) {
             $ids = array_column($ids, 'id');
@@ -450,7 +451,7 @@ END;
 
 操作步骤：
 1. 导出CSV文件                  从原始数据源导出[outTrade,outExp,outStatus]
-2. 导入CSV文件  [inCSV]         导入到审计数据库
+2. 导入CSV文件  [inCSV]         导入到审计数据库 (仅输出SQL命令, 未执行, 需事先建表)
 3. 修正金额     [fixTrade]      设定目标修正金额 (仅操作订单)
 4. 导入订单     [inTrade]       删除消耗中的订单记录,然后导入订单到消耗表
 5. 手动检查                     检查测试数据,非法超大数据
