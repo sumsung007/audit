@@ -14,8 +14,8 @@ class AuditTools
     private $config;
     private $from;
     private $to;
-    private $pdo;
     private $option;
+    private $_pdo;
     private $_RUN_TIME_START;
     private $_RUN_TIME_END;
 
@@ -196,7 +196,7 @@ END;
 
         // TODO :: 清掉exp记录, trade记录 (不在期末, 但在exp表中的记录)  | (outExp,outStatus导出时严格限制充值用户 则不需要此步骤) 也可增加期末状态
         $sql = "SELECT id FROM $table_exp WHERE user_id NOT IN(SELECT user_id FROM $table_end)";
-        $pdo = $this->getPdo('audit');
+        $pdo = $this->pdo('audit');
         $ids = $pdo->fetchAll($sql);
         if ($ids) {
             $ids = array_column($ids, 'id');
@@ -283,10 +283,10 @@ END;
      * @param $key
      * @return mixed
      */
-    private function getPdo($key)
+    private function pdo($key)
     {
-        if (isset($this->pdo[$key])) {
-            return $this->pdo[$key];
+        if (isset($this->_pdo[$key])) {
+            return $this->_pdo[$key];
         }
 
         $cfg = null;
@@ -314,8 +314,8 @@ END;
             'username' => $cfg['user'],
             'password' => $cfg['pass'],
         ];
-        $this->pdo[$key] = new MySQL($config);
-        return $this->pdo[$key];
+        $this->_pdo[$key] = new MySQL($config);
+        return $this->_pdo[$key];
     }
 
 
