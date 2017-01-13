@@ -264,9 +264,105 @@ END;
     }
 
 
+    /**
+     * TODO :: exp表是否增加时间索引
+     */
     private function moveExp()
     {
         $this->logger('START: moveExp');
+        $pdo = $this->pdo('audit');
+
+        $subject = $this->config['subject'];
+        $q = substr($subject, -1);
+        if ($q == 1) {
+            exit('do something here');
+        }
+        $table_start = substr($subject, 0, -1) . strval($q - 1) . '_status'; //期初表
+        $table_end = $subject . '_status';  // 期末表
+        $table_exp = $subject . '_exp';
+
+
+        // 字典-期初
+        $sql = "SELECT user_id, coin FROM $table_start";
+        $tmp = $pdo->fetchAll($sql);
+        $dict_start = array_column($tmp, 'coin', 'user_id');
+
+
+        // 字典-期末
+        $sql = "SELECT user_id, coin FROM $table_end";
+        $tmp = $pdo->fetchAll($sql);
+        $dict_end = array_column($tmp, 'coin', 'user_id');
+
+
+        // 所有exp记录
+        $sql = "SELECT id, user_id, coin, time FROM $table_exp ORDER BY time LIMIT 10"; // todo
+        $exp_list = $pdo->fetchAll($sql);
+
+
+        // 按用户分组
+        $data = [];
+        foreach ($exp_list as $value) {
+            $user_id = $value['user_id'];
+            $data[$user_id][] = $value;
+        }
+
+
+        // 分别处理
+        foreach ($data as $user_id => $record_list) {
+            if (!isset($dict_start[$user_id])) {
+                $total = 0;
+            } else {
+                $total = $dict_start[$user_id];
+            }
+
+
+            // 设定初始值
+            $coin = $total;
+            $move_flag = false;     // 移动标识
+            $move_list = [];        // 需要移动的列表
+            $record_number = count($record_list);
+
+            // 处理单个用户 exp_list
+            foreach ($record_list as $record_key => $record) {
+                $total += $record['coin'];
+                $coin += $record['coin'];
+
+                if ($coin < 0) {
+                    $this->logger("发现需要移动项目{$record['id']}");
+                    //dd($total, $record, '还他妈有问题');
+                    $coin -= $record['coin'];
+                    $move_flag = true;
+                    $move_list[] = $record; // 移动列表
+                }
+
+                // 移动
+                if ($move_flag && $total >= 0) {
+                    // 新的时间开始节点
+                    $time = strtotime($record['time']);
+
+                    // 执行分别移动 [移动时可能刚好移动到角色相同的时间节点导致问题,建议多执行几次此脚本]
+                    foreach ($move_list as $k => $record_move) {
+                        $newDateTime = date('Y-m-d H:i:s', $time + 2 * ($k + 1)); // 间隔2秒
+                        $sql = "UPDATE $table_exp SET time='$newDateTime' WHERE id={$record_move['id']}";
+                        $this->logger("移动EXP-id:{$record_move['id']}, 时间:{$record_move['time']} => $newDateTime");
+                        $this->pdo('audit')->execute($sql);
+                    }
+
+                    // 重置
+                    $move_flag = false;
+                    $move_list = [];
+                    $coin = $total;
+                }
+
+                // 最后一行时校验数据平衡
+                if ($record_number == $record_key + 1) {
+                    if ($total != $dict_end[$user_id]) {
+                        $this->logger("Error: 期初加消耗不等期末{$user_id}");
+                    }
+                }
+
+            }
+        }
     }
 
 
