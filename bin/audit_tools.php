@@ -154,20 +154,17 @@ class AuditTools
             $file_tr = "{$this->config['subject']}_{$category}_trade.csv";
             $file_st = "{$this->config['subject']}_{$category}_status.csv";
             $file_ex = "{$this->config['subject']}_{$category}_exp.csv";
-            $table_tr = "{$this->config['subject']}_trade";
-            $table_st = "{$this->config['subject']}_status";
-            $table_ex = "{$this->config['subject']}_exp";
             $sql = <<<END
-LOAD DATA LOCAL INFILE '/tmp/$file_tr' INTO TABLE $table_tr CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, amount=@c2, gateway=@c3, time=@c4;
-LOAD DATA LOCAL INFILE '/tmp/$file_st' INTO TABLE $table_st CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2) SET user_id=@c1, coin=@c2;
-LOAD DATA LOCAL INFILE '/tmp/$file_ex' INTO TABLE $table_ex CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, coin=@c2, type=@c3, time=@c4;
+LOAD DATA LOCAL INFILE '/tmp/$file_tr' INTO TABLE {$this->_TAB_TRADE} CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, amount=@c2, gateway=@c3, time=@c4;
+LOAD DATA LOCAL INFILE '/tmp/$file_st' INTO TABLE {$this->_TAB_END} CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2) SET user_id=@c1, coin=@c2;
+LOAD DATA LOCAL INFILE '/tmp/$file_ex' INTO TABLE {$this->_TAB_EXP} CHARACTER SET utf8mb4 FIELDS TERMINATED BY '\t' ENCLOSED BY '"' (@c1,@c2,@c3,@c4) SET user_id=@c1, coin=@c2, type=@c3, time=@c4;
 END;
             dump($sql);
         }
         $sql = <<<END
-DELETE FROM `{$this->config['subject']}_trade` WHERE user_id='user_id';
-DELETE FROM `{$this->config['subject']}_status` WHERE user_id='user_id';
-DELETE FROM `{$this->config['subject']}_exp` WHERE user_id='user_id';
+DELETE FROM `{$this->_TAB_TRADE}` WHERE user_id='user_id';
+DELETE FROM `{$this->_TAB_END}` WHERE user_id='user_id';
+DELETE FROM `{$this->_TAB_EXP}` WHERE user_id='user_id';
 END;
         dump($sql);
     }
@@ -221,7 +218,7 @@ END;
         if ($ids) {
             $ids = array_column($ids, 'id');
             $ids = implode(',', $ids);
-            $sql = "DELETE FROM $table_exp WHERE id IN ($ids)";
+            $sql = "DELETE FROM {$this->_TAB_EXP} WHERE id IN ($ids)";
             $pdo->execute($sql);
         }
 
@@ -233,13 +230,13 @@ END;
 
 
         // 字典-消耗
-        $sql = "SELECT user_id, SUM(coin) coin FROM $table_exp GROUP BY user_id";
+        $sql = "SELECT user_id, SUM(coin) coin FROM {$this->_TAB_EXP} GROUP BY user_id";
         $tmp = $pdo->fetchAll($sql);
         $dict_exp = array_column($tmp, 'coin', 'user_id');
 
 
         // 循环期末状态
-        $sql_insert = "INSERT INTO {$table_exp}(user_id, coin, type, time) VALUES";
+        $sql_insert = "INSERT INTO {$this->_TAB_EXP}(user_id, coin, type, time) VALUES";
         $execute = false;
 
         $sql = "SELECT user_id, coin FROM {$this->_TAB_END}";
