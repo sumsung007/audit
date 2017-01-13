@@ -207,24 +207,16 @@ END;
 
         // 准备参数
         $pdo = $this->pdo('audit');
-        $subject = $this->config['subject'];
-        $q = substr($subject, -1);
-        if ($q == 1) {
-            exit('do something here');
-        }
-        $table_start = substr($subject, 0, -1) . strval($q - 1) . '_status'; //期初表
-        $table_end = $subject . '_status';  // 期末表
-        $table_exp = $subject . '_exp';     // 消耗表
 
 
         // 期初的用户必须在期末中出现，(仅在有合服时导致有期初无期末,更改用户ID导致)
-        $sql = "INSERT INTO {$table_end}(user_id, coin) SELECT user_id, coin FROM {$table_start} WHERE user_id NOT IN(SELECT user_id FROM {$table_end})";
+        $sql = "INSERT INTO {$this->_TAB_END}(user_id, coin) SELECT user_id, coin FROM {$this->_TAB_START} WHERE user_id NOT IN(SELECT user_id FROM {$this->_TAB_END})";
         $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
         $this->executeShell($shell);
 
 
         // TODO :: 清掉exp记录, trade记录 (不在期末, 但在exp表中的记录)  | (outExp,outStatus导出时严格限制充值用户 则不需要此步骤) 也可增加期末状态
-        $sql = "SELECT id FROM $table_exp WHERE user_id NOT IN(SELECT user_id FROM $table_end)";
+        $sql = "SELECT id FROM {$this->_TAB_EXP} WHERE user_id NOT IN(SELECT user_id FROM {$this->_TAB_END}) LIMIT 100000"; // TODO :: 分批处理
         $ids = $pdo->fetchAll($sql);
         if ($ids) {
             $ids = array_column($ids, 'id');
@@ -235,7 +227,7 @@ END;
 
 
         // 字典-期初
-        $sql = "SELECT user_id, coin FROM $table_start";
+        $sql = "SELECT user_id, coin FROM {$this->_TAB_START}";
         $tmp = $pdo->fetchAll($sql);
         $dict_start = array_column($tmp, 'coin', 'user_id');
 
@@ -250,7 +242,7 @@ END;
         $sql_insert = "INSERT INTO {$table_exp}(user_id, coin, type, time) VALUES";
         $execute = false;
 
-        $sql = "SELECT user_id, coin FROM $table_end";
+        $sql = "SELECT user_id, coin FROM {$this->_TAB_END}";
         $tmp = $pdo->fetchAll($sql);
         $dict_end = array_column($tmp, 'coin', 'user_id');
         foreach ($dict_end as $user_id => $coin_end) {
@@ -293,7 +285,8 @@ END;
 
 
     /**
-     * TODO :: exp表是否增加时间索引
+     * 移动数据
+     * ALTER TABLE `audit_system`.`2016q4_exp` ADD INDEX `time_user` (`time`,`user_id`) comment '';
      */
     private function moveExp()
     {
@@ -347,7 +340,7 @@ END;
             $coin += $record['coin'];
 
             if ($coin < 0) {
-                $this->logger("发现需要移动项目{$record['id']}");
+                $this->logger("发现需要移动项目EXP-id:{$record['id']}");
                 //dd($total, $record, '还他妈有问题');
                 $coin -= $record['coin'];
                 $move_flag = true;
@@ -462,7 +455,7 @@ END;
 4. 导入订单     [inTrade]       删除消耗中的订单记录,然后导入订单到消耗表
 5. 手动检查                     检查测试数据,非法超大数据
 6. 平衡消耗     [balanceExp]    无期末则补充,其他情况补消耗(期初+消耗=期末)
-7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0)
+7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0) 应创建time,user_id索引
 -------------------------------------------
 
 END;
