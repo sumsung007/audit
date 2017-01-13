@@ -283,7 +283,7 @@ END;
 
     /**
      * 移动数据
-     * ALTER TABLE `audit_system`.`2016q4_exp` ADD INDEX `time_user` (`time`,`user_id`) comment '';
+     * ALTER TABLE `audit_system`.`2016q4_exp` ADD INDEX `user` (`user_id`);
      */
     private function moveExp()
     {
