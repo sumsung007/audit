@@ -102,15 +102,25 @@ class AuditTools
         $this->logger('START: outStatus');
         foreach ($this->config['servers'] as $category => $list) {
             foreach ($list as $server_id => $server) {
+                // 有充值的角色
+                $pdo = $this->pdo($category);
+                $sql = "SELECT role_id user_id FROM order_log WHERE status='complete' AND server_id='{$server_id}' GROUP BY role_id";
+                $ids = $pdo->fetchAll($sql);
+                if (!$ids) {
+                    continue;
+                }
+                $ids = array_column($ids, 'user_id');
+                $ids = "'" . implode("','", $ids) . "'";
+
+                // 查期末
                 $fileName = "{$this->config['subject']}_{$category}_status.csv";
-                $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin FROM role";
+                $sql = "SELECT CONCAT($server_id,'-',role_id) user_id, gold coin FROM role WHERE  role_id IN($ids)";
 
                 // SHELL
                 $shell = "mysql -h{$server['host']} -P{$server['port']} -u{$server['user']} -p{$server['pass']} -e \"USE {$server['db']}; {$sql}\" >> /tmp/{$fileName}";
                 $this->executeShell($shell);
             }
         }
-
     }
 
 
