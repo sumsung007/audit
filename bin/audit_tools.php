@@ -295,7 +295,7 @@ END;
 
 
         // 所有exp记录
-        $sql = "SELECT id, user_id, coin, time FROM $table_exp ORDER BY time LIMIT 10"; // todo
+        $sql = "SELECT id, user_id, coin, time FROM $table_exp ORDER BY time";
         $exp_list = $pdo->fetchAll($sql);
 
 
