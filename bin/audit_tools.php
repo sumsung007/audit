@@ -170,6 +170,9 @@ END;
     }
 
 
+    /**
+     * 校正金额
+     */
     private function fixTrade()
     {
         $this->logger('START: fixTrade');
@@ -185,12 +188,12 @@ END;
         $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
 
         // 清理
-        $sql = "DELETE FROM {$this->config['subject']}_exp WHERE type='1'";
+        $sql = "DELETE FROM {$this->_TAB_EXP} WHERE type='1'";
         $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
         $this->executeShell($shell);
 
         // 插入
-        $sql = "INSERT INTO {$this->config['subject']}_exp(user_id,coin,type,time) SELECT user_id,gateway,1,time FROM {$this->config['subject']}_trade";
+        $sql = "INSERT INTO {$this->_TAB_EXP}(user_id,coin,type,time) SELECT user_id,gateway,1,time FROM {$this->_TAB_TRADE}";
         $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\"";
         $this->executeShell($shell);
     }
@@ -452,7 +455,7 @@ END;
 4. 导入订单     [inTrade]       删除消耗中的订单记录,然后导入订单到消耗表
 5. 手动检查                     检查测试数据,非法超大数据
 6. 平衡消耗     [balanceExp]    无期末则补充,其他情况补消耗(期初+消耗=期末)
-7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0) 应创建time,user_id索引
+7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0) 应创建user_id索引
 -------------------------------------------
 
 END;
