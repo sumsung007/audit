@@ -36,28 +36,29 @@ CREATE TABLE `apps` (
 
 
 
-# Dump of table gm_exp_2017q1
+# Dump of table 2017q1_gm_exp
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `gm_exp_2017q1`;
+DROP TABLE IF EXISTS `2017q1_gm_exp`;
 
-CREATE TABLE `gm_exp_2017q1` (
+CREATE TABLE `2017q1_gm_exp` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` varchar(32) DEFAULT '',
   `coin` int(11) DEFAULT '0',
   `type` varchar(16) DEFAULT '',
   `time` datetime DEFAULT '0000-01-01 00:00:00',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Expense Records';
 
 
 
-# Dump of table gm_status_2017q1
+# Dump of table 2017q1_gm_status
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `gm_status_2017q1`;
+DROP TABLE IF EXISTS `2017q1_gm_status`;
 
-CREATE TABLE `gm_status_2017q1` (
+CREATE TABLE `2017q1_gm_status` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` varchar(32) DEFAULT '',
   `coin` int(11) DEFAULT '0',
@@ -84,12 +85,12 @@ CREATE TABLE `summary` (
 
 
 
-# Dump of table transaction
+# Dump of table 2017q1_gm_trade
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `transaction`;
+DROP TABLE IF EXISTS `2017q1_gm_trade`;
 
-CREATE TABLE `transaction` (
+CREATE TABLE `2017q1_gm_trade` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `app_id` varchar(16) DEFAULT '',
   `user_id` varchar(32) DEFAULT '',
