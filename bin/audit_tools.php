@@ -185,7 +185,26 @@ END;
     private function inTrade()
     {
         $this->logger('START: inTrade');
+        $pdo = $this->pdo('audit');
         $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
+
+
+        // 清理trade记录(不在trade, 但在exp表中的记录)
+        $clear = true;
+        while ($clear) {
+            $sql = "SELECT id FROM {$this->_TAB_TRADE} WHERE user_id NOT IN (SELECT user_id FROM {$this->_TAB_END}) LIMIT 50000";
+            $ids = $pdo->fetchAll($sql);
+            if (!$ids) {
+                $clear = false;
+            } else {
+                $this->logger('DELETE COUNT: ' . count($ids));
+                $ids = array_column($ids, 'id');
+                $ids = implode(',', $ids);
+                $sql = "DELETE FROM {$this->_TAB_TRADE} WHERE id IN ($ids)";
+                $pdo->execute($sql);
+            }
+        }
+
 
         // 清理
         $sql = "DELETE FROM {$this->_TAB_EXP} WHERE type='1'";
@@ -215,14 +234,20 @@ END;
         $this->executeShell($shell);
 
 
-        // TODO :: 清掉exp记录, trade记录 (不在期末, 但在exp表中的记录)  | (outExp,outStatus导出时严格限制充值用户 则不需要此步骤) 也可增加期末状态
-        $sql = "SELECT id FROM {$this->_TAB_EXP} WHERE user_id NOT IN(SELECT user_id FROM {$this->_TAB_END}) LIMIT 100000"; // TODO :: 分批处理
-        $ids = $pdo->fetchAll($sql);
-        if ($ids) {
-            $ids = array_column($ids, 'id');
-            $ids = implode(',', $ids);
-            $sql = "DELETE FROM {$this->_TAB_EXP} WHERE id IN ($ids)";
-            $pdo->execute($sql);
+        // 清掉exp记录 (不在期末, 但在exp表中的记录)  | (TODO :: outExp,outStatus导出时严格限制充值用户, 则不需要此步骤, 也可增加期末状态)
+        $clear = true;
+        while ($clear) {
+            $sql = "SELECT id FROM {$this->_TAB_EXP} WHERE user_id NOT IN(SELECT user_id FROM {$this->_TAB_END}) LIMIT 100000";
+            $ids = $pdo->fetchAll($sql);
+            if (!$ids) {
+                $clear = false;
+            } else {
+                $this->logger('DELETE COUNT: ' . count($ids));
+                $ids = array_column($ids, 'id');
+                $ids = implode(',', $ids);
+                $sql = "DELETE FROM {$this->_TAB_EXP} WHERE id IN ($ids)";
+                $pdo->execute($sql);
+            }
         }
 
 
