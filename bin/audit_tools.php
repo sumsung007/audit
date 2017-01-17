@@ -189,7 +189,7 @@ END;
         $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
 
 
-        // 清理trade记录(不在trade, 但在exp表中的记录)
+        // 清理trade记录(不在期末, 但在exp表中的记录)
         $clear = true;
         while ($clear) {
             $sql = "SELECT id FROM {$this->_TAB_TRADE} WHERE user_id NOT IN (SELECT user_id FROM {$this->_TAB_END}) LIMIT 50000";
@@ -402,6 +402,27 @@ END;
 
 
     /**
+     * 导出CSV
+     */
+    private function outCSV()
+    {
+        $this->logger('START: outCSV');
+        $sh = "mysql -h{$this->config['audit']['host']} -P{$this->config['audit']['port']} -u{$this->config['audit']['user']} -p{$this->config['audit']['pass']} ";
+        $sql = "SELECT user_id,coin FROM {$this->_TAB_END}";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\" > /tmp/{$this->_TAB_END}_output.csv";
+        $this->executeShell($shell);
+
+        $sql = "SELECT user_id,amount_usd, gateway,time FROM {$this->_TAB_TRADE}";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\" > /tmp/{$this->_TAB_TRADE}_output.csv";
+        $this->executeShell($shell);
+
+        $sql = "SELECT user_id,coin,type,time FROM {$this->_TAB_EXP}";
+        $shell = $sh . "-e \"USE {$this->config['audit']['db']}; {$sql}\" > /tmp/{$this->_TAB_EXP}_output.csv";
+        $this->executeShell($shell);
+    }
+
+
+    /**
      * @param string $shell
      */
     private function executeShell($shell = '')
@@ -481,6 +502,7 @@ END;
 5. 手动检查                     检查测试数据,非法超大数据
 6. 平衡消耗     [balanceExp]    无期末则补充,其他情况补消耗(期初+消耗=期末)
 7. 移动消耗     [moveExp]       使其任意时间点(期初+消耗>0) 应创建user_id索引
+8. 导出CSV      [outCSV]        导出CSV文件
 -------------------------------------------
 
 END;
