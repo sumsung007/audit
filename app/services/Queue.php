@@ -13,18 +13,20 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Phalcon\DI;
 
+// define('AMQP_DEBUG', true);
+
 class Queue
 {
 
     /**
      * 写入消息队列
      * @param string $queue
-     * @param string $message
+     * @param string|array $messageBody
      * @return bool
      */
-    public function publish($queue = 'myQueue', $message = '')
+    public function publish($queue = 'myQueue', $messageBody = '')
     {
-        if (!$message) {
+        if (!$messageBody) {
             return false;
         }
         $config = DI::getDefault()->get('config')->mq;
@@ -53,9 +55,14 @@ class Queue
          */
         $channel->exchange_declare($exchange, 'direct', false, true, false);
         $channel->queue_bind($queue, $exchange);
-        $message = new AMQPMessage($message,
-            array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
-        $channel->basic_publish($message, $exchange);
+        if (!is_array($messageBody)) {
+            $messageBody = [$messageBody];
+        }
+        foreach ($messageBody as $msg) {
+            $message = new AMQPMessage($msg,
+                array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+            $channel->basic_publish($message, $exchange);
+        }
         $channel->close();
         $connection->close();
         return true;
