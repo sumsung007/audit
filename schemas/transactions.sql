@@ -20,17 +20,19 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Dump of table notify_apps
+# Dump of table apps
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `notify_apps`;
+DROP TABLE IF EXISTS `apps`;
 
-CREATE TABLE `notify_apps` (
+CREATE TABLE `apps` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) DEFAULT '',
   `app_id` varchar(16) DEFAULT '',
   `secret_key` varchar(32) DEFAULT '',
   `notify_url` varchar(512) DEFAULT '',
+  `trade_method` varchar(40) DEFAULT '',
+  `trade_tip` varchar(1000) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `app_id` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='应用';
