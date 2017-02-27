@@ -55,7 +55,7 @@ class Auth extends Model
      */
     public function getUserByTicket($ticket = '')
     {
-        $dateTime = date('Y-m-d H:i:s', time() - 60);
+        $dateTime = date('Y-m-d H:i:s', time() - 300);
         $sql = "SELECT u.* FROM `users` u, `tickets` t WHERE u.id=t.user_id AND t.ticket=:ticket AND t.create_time>'$dateTime'";
         $bind = array('ticket' => $ticket);
         // TODO :: 此处如使用$this->dbConnection时,外部程序使用file_get_contents(VerifyURL)调用时报错,直接访问VerifyURL没问题

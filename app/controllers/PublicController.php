@@ -22,35 +22,35 @@ class PublicController extends Controller
         if (!$ticket) {
             // TODO :: https 协议
             $callback = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $LoginUrl = $this->config->sso->base_url . '?redirect=' . urlencode($callback);
-            header('Location:' . $LoginUrl);
+            $login_url = $this->config->sso->base_url . '?redirect=' . urlencode($callback);
+            header('Location:' . $login_url);
             exit();
         }
 
         // 验证ticket
-        $verifyUrl = $this->config->sso->base_url . '/verify?ticket=' . $ticket;
-        $result = file_get_contents($verifyUrl);
+        $verify_url = $this->config->sso->base_url . '/verify/' . $ticket;
+        $result = file_get_contents($verify_url);
         $result = json_decode($result, true);
-
         if ($result['code'] != 0) {
             Utils::tips('warning', 'Login Failed');
         }
 
 
         // TODO::拿Ticket换取资源 增加APPKEY
-        $resourceUrl = $this->config->sso->base_url . '/resources?app=' . $this->config->sso->app_id . '&ticket=' . $ticket;
-        $resources = json_decode(file_get_contents($resourceUrl), true);
+        $resource_url = $this->config->sso->base_url . '/resources?app=' . $this->config->sso->app_id . '&ticket=' . $ticket;
+        $resources = json_decode(file_get_contents($resource_url), true);
         if ($resources['code'] != 0) {
             Utils::tips('warning', 'Error When Get Resources');
         } else {
-            $this->session->set('resources', $resources['data']);
+            unset($resources['code'], $resources['msg']);
+            $this->session->set('resources', $resources);
         }
 
 
         // 设置SESSION
-        $this->session->set('user_id', $result['data']['user_id']);
-        $this->session->set('username', $result['data']['username']);
-        $this->session->set('name', $result['data']['name']);
+        $this->session->set('user_id', $result['user_id']);
+        $this->session->set('username', $result['username']);
+        $this->session->set('name', $result['name']);
 
 
         header('Location:/');

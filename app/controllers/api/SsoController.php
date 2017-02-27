@@ -193,17 +193,38 @@ class SsoController extends ControllerBase
 
     public function verifyAction()
     {
-        $ticket = $this->request->get('ticket', 'string');
+        $argv = $this->dispatcher->getParams();
+        if (!isset($argv['0'])) {
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'invalid argv'
+            ])->send();
+            exit();
+        }
+        $ticket = $argv['0'];
         $user = $this->authModel->getUserByTicket($ticket);
         if (!$user) {
-            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'failed'
+            ])->send();
+            exit();
         }
-        $user = array(
-            'user_id'  => $user['id'],
-            'username' => $user['username'],
-            'name'     => $user['name']
-        );
-        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $user));
+
+        $this->response->setJsonContent(
+            array_merge(
+                [
+                    'code' => 0,
+                    'msg'  => 'success'
+                ]
+                ,
+                [
+                    'user_id'  => $user['id'],
+                    'username' => $user['username'],
+                    'name'     => $user['name']
+                ]
+            ))->send();
+        exit();
     }
 
 
@@ -213,13 +234,22 @@ class SsoController extends ControllerBase
         $ticket = $this->request->get('ticket', 'string');
         $user = $this->authModel->getUserByTicket($ticket);
         if (!$user) {
-            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'failed'
+            ])->send();
+            exit;
         }
 
         $result['aclAll'] = $this->authModel->getAclResource(10000, $app);
         $result['aclAllow'] = $this->authModel->getAclResource($user['id'], $app);
         $result['menuTree'] = $this->utilsModel->list2tree($this->authModel->getResources($user['id'], $app));
-        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $result));
+
+        $this->response->setJsonContent([
+                'code' => 0,
+                'msg'  => 'success'
+            ] + $result)->send();
+        exit;
     }
 
 }
