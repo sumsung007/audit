@@ -12,6 +12,8 @@ class SsoController extends ControllerBase
 {
 
     private $authModel;
+
+
     private $utilsModel;
 
 
@@ -102,7 +104,7 @@ class SsoController extends ControllerBase
 
             // 检查令牌
             if (empty($userData['secret_key'])) {
-                $this->session->set('isLogin', 1);
+                $this->session->set('is_login', 1);
                 $this->authModel->securityCheck($userData, $location);
                 header("Location:" . $redirect);
             } else {
@@ -136,7 +138,7 @@ class SsoController extends ControllerBase
             if (!$checkResult) {
                 Utils::tips('warning', 'Authenticator Code Is Error');
             }
-            $this->session->set('isLogin', 1);
+            $this->session->set('is_login', 1);
             header("Location:" . $redirect);
             exit();
         }
@@ -154,7 +156,8 @@ class SsoController extends ControllerBase
     {
         $username = $this->session->get('username');
         if (!$username) {
-            exit('No Permission');
+            $this->response->setJsonContent(['code' => 1, 'msg' => 'No Permission'])->send();
+            exit();
         }
 
         // 二维码生成与验证
@@ -163,12 +166,14 @@ class SsoController extends ControllerBase
             $code = $this->request->get('code', 'int');
             $secret_key = $this->session->get('secret_key');
             $checkResult = $otp->verifyCode($secret_key, $code, 2);
+            // TODO :: 梳理
             if (!$checkResult) {
-                Utils::outputJSON(array('code' => 0, 'message' => 'Verify Success'));
+                $this->response->setJsonContent(['code' => 0, 'msg' => 'Verify Success'])->send();
                 $user_id = $this->session->get('user_id');
                 $this->authModel->setOTPKey($user_id, $secret_key);
             }
-            Utils::outputJSON(array('code' => 1, 'message' => 'Verify Failed'));
+            $this->response->setJsonContent(['code' => 1, 'msg' => 'Verify Failed'])->send();
+            exit();
         }
         $secret_key = $otp->createSecret(32);
         $this->session->set('secret_key', $secret_key);
@@ -211,6 +216,10 @@ class SsoController extends ControllerBase
             exit();
         }
 
+
+        if (empty($user['avatar'])) {
+            $user['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($user['username']))) . '?s=80&d=identicon';
+        }
         $this->response->setJsonContent(
             array_merge(
                 [
@@ -221,7 +230,8 @@ class SsoController extends ControllerBase
                 [
                     'user_id'  => $user['id'],
                     'username' => $user['username'],
-                    'name'     => $user['name']
+                    'name'     => $user['name'],
+                    'avatar'   => $user['avatar']
                 ]
             ))->send();
         exit();
