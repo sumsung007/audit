@@ -31,6 +31,7 @@ class PublicController extends Controller
         $verify_url = $this->config->sso->base_url . '/verify/' . $ticket;
         $result = file_get_contents($verify_url);
         $result = json_decode($result, true);
+
         if ($result['code'] != 0) {
             Utils::tips('warning', 'Login Failed');
         }
@@ -51,6 +52,7 @@ class PublicController extends Controller
         $this->session->set('user_id', $result['user_id']);
         $this->session->set('username', $result['username']);
         $this->session->set('name', $result['name']);
+        $this->session->set('avatar', $result['avatar']);
 
 
         header('Location:/');
