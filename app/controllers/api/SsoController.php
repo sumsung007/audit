@@ -256,9 +256,12 @@ class SsoController extends ControllerBase
             exit;
         }
 
-        $result['aclAll'] = $this->authModel->getAclResource(1000, $app);
-        $result['aclAllow'] = $this->authModel->getAclResource($user['id'], $app);
-        $result['menuTree'] = $this->utilsModel->list2tree($this->authModel->getResources($user['id'], $app));
+
+        // ACL是phalcon的ACL指定格式
+        $acl_resources = $this->authModel->getResources($user['id'], $app);
+        $result['acl_all'] = $this->authModel->getAclFormat($this->authModel->getResources(1000, $app));
+        $result['acl_allow'] = $this->authModel->getAclFormat($acl_resources);
+        $result['menu_tree'] = $this->utilsModel->list2tree($acl_resources);
 
         $this->response->setJsonContent([
                 'code' => 0,

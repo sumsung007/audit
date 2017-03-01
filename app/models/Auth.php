@@ -141,19 +141,14 @@ class Auth extends Model
 
 
     /**
-     * 获取私有资源acl格式
-     * @param int $user_id
-     * @param string $app
+     * 资源格式化为ACL格式
+     * @param array $resource
      * @return array
      */
-    public function getAclResource($user_id = 0, $app = '')
+    public function getAclFormat($resource = [])
     {
-        $data = $this->getResources($user_id, $app);
-        if (!$data) {
-            return [];
-        }
         $result = [];
-        foreach ($data as $value) {
+        foreach ($resource as $value) {
             $resource = explode('/', trim($value['resource'], '/'));
             if (in_array($resource['0'], array('api', 'admin'))) {
                 $controller = "{$resource['0']}/{$resource['1']}";

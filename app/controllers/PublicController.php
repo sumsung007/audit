@@ -3,9 +3,9 @@
 
 namespace MyApp\Controllers;
 
+
 use MyApp\Models\Utils;
 use Phalcon\Mvc\Controller;
-
 
 class PublicController extends Controller
 {
@@ -19,16 +19,24 @@ class PublicController extends Controller
     public function loginAction()
     {
         $ticket = $this->request->get('ticket', 'string');
+
+        // BASE URL
+        if ($this->config->setting->security_plugin == 1) {
+            $base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/api/sso';
+        } else {
+            $base_url = $this->config->sso->base_url;
+        }
+
         if (!$ticket) {
             // TODO :: https 协议
             $callback = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $login_url = $this->config->sso->base_url . '?redirect=' . urlencode($callback);
+            $login_url = $base_url . '?redirect=' . urlencode($callback);
             header('Location:' . $login_url);
             exit();
         }
 
         // 验证ticket
-        $verify_url = $this->config->sso->base_url . '/verify/' . $ticket;
+        $verify_url = $base_url . '/verify/' . $ticket;
         $result = file_get_contents($verify_url);
         $result = json_decode($result, true);
 
@@ -38,7 +46,7 @@ class PublicController extends Controller
 
 
         // TODO::拿Ticket换取资源 增加APPKEY
-        $resource_url = $this->config->sso->base_url . '/resources?app=' . $this->config->sso->app_id . '&ticket=' . $ticket;
+        $resource_url = $base_url . '/resources?app=' . $this->config->setting->app_id . '&ticket=' . $ticket;
         $resources = json_decode(file_get_contents($resource_url), true);
         if ($resources['code'] != 0) {
             Utils::tips('warning', 'Error When Get Resources');
@@ -99,6 +107,5 @@ class PublicController extends Controller
         $this->view->message = 'Error 400, Exception Occurs';
         $this->view->pick("public/errors");
     }
-
 
 }
