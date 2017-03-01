@@ -42,6 +42,11 @@ class SsoController extends ControllerBase
             $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
 
+            if (!($username && $password)) {
+                Utils::tips('warning', 'Empty User Nor Password');
+            }
+
+
             // 安全检查 TODO::验证码
             if (!$this->authModel->checkLoginTimes($ipAddress)) {
                 Utils::tips('warning', 'Login Failed Too Much Time');
@@ -56,7 +61,7 @@ class SsoController extends ControllerBase
 
 
             // 验证密码
-            $verifyResult = password_verify($password, $userData['password']);
+            $verify_result = password_verify($password, $userData['password']);
 
             // 登录日志
             $location = $this->utilsModel->getLocation($ipAddress);
@@ -66,14 +71,14 @@ class SsoController extends ControllerBase
                 'location'   => $location,
                 'user_agent' => $user_agent,
                 'referer'    => $referer,
-                'result'     => $verifyResult ? 1 : 0,
+                'result'     => $verify_result ? 1 : 0,
             );
-            $this->authModel->logsLogin($log);
+            $this->authModel->loginLog($log);
 
-            if (!$verifyResult) {
+            // 检查
+            if (!$verify_result) {
                 Utils::tips('warning', 'Password Error');
             }
-
             if ($userData['status'] != 1) {
                 Utils::tips('warning', 'The User Is Limited');
             }
