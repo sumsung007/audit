@@ -112,7 +112,7 @@ class Auth extends Model
     public function getResources($user_id = 0, $app = '')
     {
         // 超级管理员
-        if ($user_id == 10000) {
+        if ($user_id == 1000) {
             $sql = "SELECT res.id, res.name, res.resource, res.type, res.parent, res.icon
                 FROM `resources` res
                 WHERE res.status=1 AND res.app=:app

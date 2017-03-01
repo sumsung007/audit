@@ -256,7 +256,7 @@ class SsoController extends ControllerBase
             exit;
         }
 
-        $result['aclAll'] = $this->authModel->getAclResource(10000, $app);
+        $result['aclAll'] = $this->authModel->getAclResource(1000, $app);
         $result['aclAllow'] = $this->authModel->getAclResource($user['id'], $app);
         $result['menuTree'] = $this->utilsModel->list2tree($this->authModel->getResources($user['id'], $app));
 

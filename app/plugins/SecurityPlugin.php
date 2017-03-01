@@ -79,7 +79,7 @@ class SecurityPlugin extends Plugin
             // 使用自己的权限控制
             $authModel = new Auth();
             $privateResources = $authModel->getAclResource($user_id, $app);
-            $allResources = $authModel->getAclResource(10000, $app);
+            $allResources = $authModel->getAclResource(1000, $app);
         } else {
             // 使用资源中心的权限控制
             $resources = $this->session->get('resources');
