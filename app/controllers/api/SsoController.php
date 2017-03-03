@@ -153,6 +153,7 @@ class SsoController extends ControllerBase
 
     public function logoutAction()
     {
+        $this->persistent->destroy();
         $this->session->destroy();
     }
 
