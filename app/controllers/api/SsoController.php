@@ -246,7 +246,7 @@ class SsoController extends ControllerBase
 
     public function resourcesAction()
     {
-        $app = $this->request->get('app', 'int');
+        $app = $this->request->get('app', 'string');
         $ticket = $this->request->get('ticket', 'string');
         $user = $this->authModel->getUserByTicket($ticket);
         if (!$user) {
