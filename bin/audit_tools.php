@@ -38,9 +38,10 @@ class AuditTools
         $subject = $this->config['subject'];
         $q = substr($subject, -1);
         if ($q == 1) {
-            exit('do something here');
+            $this->_TAB_START = substr($subject, 0, 4) - 1 . 'q4_status';
+        } else {
+            $this->_TAB_START = substr($subject, 0, -1) . strval($q - 1) . '_status';
         }
-        $this->_TAB_START = substr($subject, 0, -1) . strval($q - 1) . '_status'; //期初表
         $this->_TAB_END = $subject . '_status';  // 期末表
         $this->_TAB_EXP = $subject . '_exp';
         $this->_TAB_TRADE = $subject . '_trade';
@@ -176,6 +177,122 @@ END;
     private function fixTrade()
     {
         $this->logger('START: fixTrade');
+        $pdo = $this->pdo('audit');
+        foreach ($this->config['total'] as $fix_array) {
+            foreach ($fix_array as $month => $amount_goal) {
+                if (!$amount_goal) {
+                    continue;
+                };
+                $month_start = date('Y-m-d H:i:s', strtotime($month));
+                $month_end = date('Y-m-d H:i:s', strtotime('+1 month', strtotime($month)));
+
+                $this->logger($month_start . ' - ' . $month_end);
+
+                // 获取样本产品
+                $sql = "SELECT amount,amount_usd,coin FROM `{$this->_TAB_TRADE}` WHERE amount_usd>0 AND `time`>='{$month_start}' AND `time`<'$month_end' GROUP BY amount,amount_usd,coin ORDER BY amount_usd DESC";
+                $example_recharge_list = $pdo->fetchAll($sql);
+                if (!$example_recharge_list) {
+                    $this->logger('no demo recharge list');
+                }
+                // 设定误差阀值
+                $threshold_value = $example_recharge_list['0']['amount_usd'] / 2;
+
+
+                // 当前金额
+                $sql = "SELECT SUM(amount_usd) amount_usd FROM {$this->_TAB_TRADE} WHERE time>='{$month_start}' AND time<'$month_end'";
+                $amount_now = $pdo->fetchOne($sql);
+                $amount_now = $amount_now['amount_usd'];
+
+
+                /**
+                 * 减少数据
+                 */
+                if ($amount_now > $amount_goal) {
+                    // 计算数量
+                    $sql = "SELECT COUNT(1) count FROM {$this->_TAB_TRADE} WHERE time>='{$month_start}' AND time<'$month_end'";
+                    $count = $pdo->fetchOne($sql);
+                    $count = $count['count'];
+
+
+                    // 删除记录
+                    for ($i = 0; $i < 1000000; $i++) {
+                        // 随机获取数据
+                        $rand = mt_rand(0, $count - 1);
+                        $sql = "SELECT id,amount,amount_usd,coin FROM {$this->_TAB_TRADE} WHERE time>='{$month_start}' AND time<'$month_end' LIMIT $rand, 1";
+                        $line = $pdo->fetchOne($sql);
+                        if (!$line) {
+                            continue;
+                        }
+                        $count -= 1;
+
+                        $sql_bill = "DELETE FROM {$this->_TAB_TRADE} WHERE id={$line['id']}";
+                        if (!$pdo->execute($sql_bill)) {
+                            $this->logger('delete trade failed');
+                        }
+
+                        $amount_now -= $line['amount_usd'];
+                        if ($amount_now - $amount_goal < $threshold_value) {
+                            break;
+                        }
+                    }
+
+                } /**
+                 *
+                 *
+                 * 补充数据
+                 */
+                elseif ($amount_now < $amount_goal) {
+                    // 获取储值前500用户样本
+                    $sql = "SELECT app_id, user_id, SUM(amount_usd) amount_usd, MAX(uuid) uuid, MAX(ip) ip, MIN(`time`) minTime, MAX(`time`) maxTime
+FROM {$this->_TAB_TRADE}
+WHERE time>='{$month_start}' AND time<'$month_end'
+GROUP BY app_id, user_id
+ORDER BY amount_usd DESC LIMIT 500";
+
+                    $top_users = $pdo->fetchAll($sql);
+                    $top_users = array_slice($top_users, 10, 400); // 去掉前10,取400条
+
+
+                    // 开始增加数据
+                    $num = count($example_recharge_list);
+                    $top_user_count = count($top_users) > 399 ? 399 : count($top_users);
+                    for ($i = 0; $i < 1000000; $i++) {
+
+                        // 随机用户
+                        $rand = mt_rand(0, $top_user_count);
+                        if (!isset($top_users[$rand])) {
+                            continue;
+                        }
+                        $user = $top_users[$rand];
+
+                        // 随机产品
+                        $rand = mt_rand(0, $num - 1);
+                        $product = $example_recharge_list[$rand];
+
+                        // 随机订单时间
+                        $rand_trade_time = date('Y-m-d H:i:s',
+                            mt_rand(strtotime($user['minTime']), strtotime($user['maxTime'])));
+
+                        $sql_new_trade = "INSERT INTO {$this->_TAB_TRADE}(app_id, user_id, amount, amount_usd, coin, uuid, ip, `time`)
+VALUES ('{$user['app_id']}','{$user['user_id']}','{$product['amount']}', '{$product['amount_usd']}', {$product['coin']}, '{$user['uuid']}','{$user['ip']}', '$rand_trade_time');";
+
+
+                        if (!$pdo->execute($sql_new_trade)) {
+                            $this->logger('insert data failed');
+                        }
+
+                        // 判断
+                        $amount_now += $product['amount_usd'];
+                        if ($amount_goal - $amount_now < $threshold_value) {
+                            break;
+                        }
+                    }
+                }
+
+
+                $this->logger('fixTrade Complete');
+            }
+        }
     }
 
 
