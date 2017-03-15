@@ -12,6 +12,8 @@ class SsoController extends ControllerBase
 {
 
     private $authModel;
+
+
     private $utilsModel;
 
 
@@ -40,6 +42,11 @@ class SsoController extends ControllerBase
             $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
 
+            if (!($username && $password)) {
+                Utils::tips('warning', 'Empty User Nor Password');
+            }
+
+
             // 安全检查 TODO::验证码
             if (!$this->authModel->checkLoginTimes($ipAddress)) {
                 Utils::tips('warning', 'Login Failed Too Much Time');
@@ -54,7 +61,7 @@ class SsoController extends ControllerBase
 
 
             // 验证密码
-            $verifyResult = password_verify($password, $userData['password']);
+            $verify_result = password_verify($password, $userData['password']);
 
             // 登录日志
             $location = $this->utilsModel->getLocation($ipAddress);
@@ -64,14 +71,14 @@ class SsoController extends ControllerBase
                 'location'   => $location,
                 'user_agent' => $user_agent,
                 'referer'    => $referer,
-                'result'     => $verifyResult ? 1 : 0,
+                'result'     => $verify_result ? 1 : 0,
             );
-            $this->authModel->logsLogin($log);
+            $this->authModel->loginLog($log);
 
-            if (!$verifyResult) {
+            // 检查
+            if (!$verify_result) {
                 Utils::tips('warning', 'Password Error');
             }
-
             if ($userData['status'] != 1) {
                 Utils::tips('warning', 'The User Is Limited');
             }
@@ -102,7 +109,7 @@ class SsoController extends ControllerBase
 
             // 检查令牌
             if (empty($userData['secret_key'])) {
-                $this->session->set('isLogin', 1);
+                $this->session->set('is_login', 1);
                 $this->authModel->securityCheck($userData, $location);
                 header("Location:" . $redirect);
             } else {
@@ -136,7 +143,7 @@ class SsoController extends ControllerBase
             if (!$checkResult) {
                 Utils::tips('warning', 'Authenticator Code Is Error');
             }
-            $this->session->set('isLogin', 1);
+            $this->session->set('is_login', 1);
             header("Location:" . $redirect);
             exit();
         }
@@ -146,6 +153,7 @@ class SsoController extends ControllerBase
 
     public function logoutAction()
     {
+        $this->persistent->destroy();
         $this->session->destroy();
     }
 
@@ -154,7 +162,8 @@ class SsoController extends ControllerBase
     {
         $username = $this->session->get('username');
         if (!$username) {
-            exit('No Permission');
+            $this->response->setJsonContent(['code' => 1, 'msg' => 'No Permission'])->send();
+            exit();
         }
 
         // 二维码生成与验证
@@ -163,12 +172,14 @@ class SsoController extends ControllerBase
             $code = $this->request->get('code', 'int');
             $secret_key = $this->session->get('secret_key');
             $checkResult = $otp->verifyCode($secret_key, $code, 2);
+            // TODO :: 梳理
             if (!$checkResult) {
-                Utils::outputJSON(array('code' => 0, 'message' => 'Verify Success'));
+                $this->response->setJsonContent(['code' => 0, 'msg' => 'Verify Success'])->send();
                 $user_id = $this->session->get('user_id');
                 $this->authModel->setOTPKey($user_id, $secret_key);
             }
-            Utils::outputJSON(array('code' => 1, 'message' => 'Verify Failed'));
+            $this->response->setJsonContent(['code' => 1, 'msg' => 'Verify Failed'])->send();
+            exit();
         }
         $secret_key = $otp->createSecret(32);
         $this->session->set('secret_key', $secret_key);
@@ -193,33 +204,71 @@ class SsoController extends ControllerBase
 
     public function verifyAction()
     {
-        $ticket = $this->request->get('ticket', 'string');
+        $argv = $this->dispatcher->getParams();
+        if (!isset($argv['0'])) {
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'invalid argv'
+            ])->send();
+            exit();
+        }
+        $ticket = $argv['0'];
         $user = $this->authModel->getUserByTicket($ticket);
         if (!$user) {
-            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'failed'
+            ])->send();
+            exit();
         }
-        $user = array(
-            'user_id'  => $user['id'],
-            'username' => $user['username'],
-            'name'     => $user['name']
-        );
-        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $user));
+
+
+        if (empty($user['avatar'])) {
+            $user['avatar'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($user['username']))) . '?s=80&d=identicon';
+        }
+        $this->response->setJsonContent(
+            array_merge(
+                [
+                    'code' => 0,
+                    'msg'  => 'success'
+                ]
+                ,
+                [
+                    'user_id'  => $user['id'],
+                    'username' => $user['username'],
+                    'name'     => $user['name'],
+                    'avatar'   => $user['avatar']
+                ]
+            ))->send();
+        exit();
     }
 
 
     public function resourcesAction()
     {
-        $app = $this->request->get('app', 'int');
+        $app = $this->request->get('app', 'string');
         $ticket = $this->request->get('ticket', 'string');
         $user = $this->authModel->getUserByTicket($ticket);
         if (!$user) {
-            Utils::outputJSON(array('code' => 1, 'message' => 'failed'));
+            $this->response->setJsonContent([
+                'code' => 1,
+                'msg'  => 'failed'
+            ])->send();
+            exit;
         }
 
-        $result['aclAll'] = $this->authModel->getAclResource(10000, $app);
-        $result['aclAllow'] = $this->authModel->getAclResource($user['id'], $app);
-        $result['menuTree'] = $this->utilsModel->list2tree($this->authModel->getResources($user['id'], $app));
-        Utils::outputJSON(array('code' => 0, 'message' => 'success', 'data' => $result));
+
+        // ACL是phalcon的ACL指定格式
+        $allow_resources = $this->authModel->getResources($user['id'], $app);
+        $result['acl_all'] = $this->authModel->getAclFormat($this->authModel->getResources(1000, $app));
+        $result['acl_allow'] = $this->authModel->getAclFormat($allow_resources);
+        $result['menu_tree'] = $this->utilsModel->list2tree($allow_resources);
+
+        $this->response->setJsonContent([
+                'code' => 0,
+                'msg'  => 'success'
+            ] + $result)->send();
+        exit;
     }
 
 }
